@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "Home",
+    "ideas": "Get Ideas",
+    "findPro": "Find Professional",
+    "shops": "Shops",
+    "signUp": "Sign Up"
+  },
+  "hero": {
+    "titlePart1": "With",
+    "titlePart2": "Built",
+    "titlePart3": "Mate",
+    "subtitle": "Make Your Dream Home a Reality",
+    "description": "Find architects, contractors, and materials in one place. Start your project with expert guidance today.",
+    "searchPlaceholder": "Type your text",
+    "getStarted": "Get Started Now"
+  },
+  "explore": {
+    "title": "Explore BuiltMate",
+    "Ideas": "Discover Ideas",
+    "findPro": "Find Professionals",
+    "shop": "Shop Materials"
+  },
+    "categories": {
+      "title": "Browse Ideas by Room",
+      "kitchen": "Kitchen",
+      "bedroom": "Bedroom",
+      "bathroom": "Bathroom",
+      "living_room": "Living Room",
+      "dining": "Dining",
+      "outdoor": "Outdoor",
+      "baby_kids": "Baby & Kids",
+      "home_office": "Home Office",
+      "storage_closet": "Storage & Closet",
+      "laundry": "Laundry"
+    },
+    "professionals": {
+      "title": "Find Professional",
+      "interior_designers": "Interior Designers",
+      "general_contractors": "General Contractors",
+      "plumbing_services": "Plumbing Services",
+      "electrical": "Electrical",
+      "architects_building": "Architects & Building",
+      "home_builders": "Home Builders",
+      "pool_builders": "Pool Builders",
+      "painters": "Painters",
+      "landscape_contractors": "Landscape Contractors",
+      "door_dealers": "Door Dealers"
+    },
+    "locations": {
+      "title": "Browse Shops by Location",
+      "amman": "Amman",
+      "zarqa": "Zarqa",
+      "ajloun": "Ajloun",
+      "aqaba": "Aqaba",
+      "madaba": "Madaba",
+      "jerash": "Jerash",
+      "karak": "Al Karak",
+      "irbid": "Irbid",
+      "mean": "Me'an",
+      "mafraq": "Mafraq"
+    },
+    "footer": {
+    "brand": "Builtmate",
+    "description": "Your go-to platform for finding professionals, construction ideas, and stores.",
+    "quickLinks": "Quick Links",
+    "explore": "Explore",
+    "home": "Home",
+    "about": "About Us",
+    "professionals": "Professionals",
+    "contact": "Contact Us",
+    "ideas": "Construction Ideas",
+    "stores": "Stores",
+    "location": "Jordan, Amman",
+    "email": "builtmate@gmail.com",
+    "phone": "+962-788844145",
+    "rights": "Builtmate. All rights reserved."
+  }
+  
+}
+
+  

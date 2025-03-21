@@ -1,0 +1,79 @@
+{
+  "nav":{
+  "home": "الرئيسية",
+  "ideas": "أفكار",
+  "findPro": "ابحث عن محترف",
+  "shops": "المتاجر",
+  "signUp": "تسجيل الدخول"
+},
+  "hero": {
+    "titlePart1": "مع",
+    "titlePart2": "بيلد",
+    "titlePart3": "مات",
+    "subtitle": "اجعل منزل أحلامك حقيقة",
+    "description": "اعثر على المهندسين المعماريين والمقاولين والمواد في مكان واحد. ابدأ مشروعك بإرشاد الخبراء اليوم.",
+    "searchPlaceholder": "اكتب نصك",
+    "getStarted": "ابدأ الآن"
+  },
+  "explore": {
+    "title": "اكتشف بيلتميت",
+    "Ideas": "اكتشف الأفكار",
+    "findPro": "اعثر على المحترفين",
+    "shop": "اكتشف المتاجر"
+  },
+    "categories": {
+      "title": "اكتشف أفكارًا لكل غرفة",
+      "kitchen": "المطبخ",
+      "bedroom": "غرفة النوم",
+      "bathroom": "الحمام",
+      "living_room": "غرفة المعيشة",
+      "dining": "غرفة الطعام",
+      "outdoor": "الخارجية",
+      "baby_kids": "الأطفال والرضع",
+      "home_office": "المكتب المنزلي",
+      "storage_closet": "التخزين والخزائن",
+      "laundry": "غرفة الغسيل"
+    },
+    "professionals": {
+      "title": "ابحث عن محترفين",
+      "interior_designers": "مصممو الديكور الداخلي",
+      "general_contractors": "المقاولون العامون",
+      "plumbing_services": "خدمات السباكة",
+      "electrical": "الكهرباء",
+      "architects_building": "المهندسون المعماريون والبناء",
+      "home_builders": "بناة المنازل",
+      "pool_builders": "بناة المسابح",
+      "painters": "الرسامون",
+      "landscape_contractors": "مقاولو تنسيق الحدائق",
+      "door_dealers": "تجار الأبواب"
+    },
+    "locations": {
+      "title": "اكتشف المتاجر القريبة منك",
+      "amman": "عمان",
+      "zarqa": "الزرقاء",
+      "ajloun": "عجلون",
+      "aqaba": "العقبة",
+      "madaba": "مادبا",
+      "jerash": "جرش",
+      "karak": "الكرك",
+      "irbid": "إربد",
+      "mean": "معان",
+      "mafraq": "المفرق"
+    },
+    "footer": {
+    "brand": "بيلتميت",
+    "description": "منصتك المثالية للعثور على محترفين، أفكار البناء، والمتاجر.",
+    "quickLinks": "روابط سريعة",
+    "explore": "استكشاف",
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "professionals": "المهنيون",
+    "contact": "تواصل معنا",
+    "ideas": "أفكار البناء",
+    "stores": "المتاجر",
+    "location": "الأردن، عمان",
+    "email": "builtmate@gmail.com",
+    "phone": "+962-788844145",
+    "rights": "بيلتميت. جميع الحقوق محفوظة."
+    }
+}
