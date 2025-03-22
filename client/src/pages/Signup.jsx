@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { loginSuccess } from "../redux/authSlice";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +11,6 @@ const Signup = () => {
   });
 
   const [error, setError] = useState(null);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
