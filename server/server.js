@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -34,10 +35,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // // Routes (Example)
-// app.use('/api/users', require('./routes/userRoutes'));
-// app.use('/api/professionals', require('./routes/proRoutes'));
-// app.use('/api/messages', require('./routes/messageRoutes'));
-// app.use('/api/payments', require('./routes/paymentRoutes'));
+app.use("/api/auth", authRoutes);
 
 // Server Listening
 const PORT = process.env.PORT || 5000;

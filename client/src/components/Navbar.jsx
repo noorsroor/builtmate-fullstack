@@ -1,21 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLanguage } from '../redux/languageSlice';
+import { logout } from '../redux/authSlice'; // Assuming you have a logout action
 import logo from '../assets/images/logo.png';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const currentLang = useSelector((state) => state.language.language);
+  const user = useSelector((state) => state.auth.user); // Get current user from Redux
   const [isOpen, setIsOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); // 👉 State for mobile menu
-
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+console.log(user)
   useEffect(() => {
     i18n.changeLanguage(currentLang);
     document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
   }, [currentLang, i18n]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuRef]);
 
   const handleLanguageChange = (lang) => {
     dispatch(setLanguage(lang));
@@ -23,11 +41,17 @@ const Navbar = () => {
   };
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen); // 👉 Toggle mobile menu
+    setMenuOpen(!menuOpen);
   };
 
   const closeMenu = () => {
-    setMenuOpen(false); // 👉 Close mobile menu on link click
+    setMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setUserMenuOpen(false);
+    navigate('/');
   };
 
   return (
@@ -38,12 +62,12 @@ const Navbar = () => {
             <div className="flex items-center">
               <img src={logo} alt="BuildMate Logo" className="h-10 w-10 mr-2" />
               <h1 className="text-2xl font-bold">
-                <span className="text-black  text-[36px]" style={{fontFamily:`"Caveat"`}}>Build</span>
+                <span className="text-black text-[36px]" style={{fontFamily:`"Caveat"`}}>Build</span>
                 <span className="text-[#E7A624]" style={{fontFamily:`"Caveat"`}}>Mate</span>
               </h1>
             </div>
 
-            {/* 🔄 Toggle Button for Mobile */}
+            {/* Toggle Button for Mobile */}
             <div className="flex md:hidden">
               <button
                 onClick={toggleMenu}
@@ -53,7 +77,7 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* 🔄 Links for Desktop */}
+            {/* Links for Desktop */}
             <div className="hidden md:flex items-center space-x-8 flex items-center space-x-8 bg-white rounded-full py-2 px-6 shadow-md" style={{ boxShadow: '0 0 10px rgba(234, 179, 8, 0.5)' }}>
               {['/', '/ideas', '/findPro', '/shops'].map((path, index) => (
                 <NavLink
@@ -72,7 +96,7 @@ const Navbar = () => {
               ))}
             </div>
 
-              <div className='hidden md:flex row'>
+            <div className='hidden md:flex items-center space-x-4'>
               <div className="relative">
                 <button
                   className="py-2 px-5 rounded-full"
@@ -98,18 +122,80 @@ const Navbar = () => {
                 )}
               </div>
 
-              <Link
-                to="/signup"
-                className="bg-[#E7A624] font-bold flex items-center text-black py-2 text-[12px] px-5 rounded-full shadow-md transition duration-300 hover:bg-yellow-600 hover:shadow-lg"
-                style={{ boxShadow: '0 0 10px rgba(234, 179, 8, 0.5)' }}
-              >
-                {t('nav.signUp')}
-              </Link>
-              </div>
+              {/* Conditional rendering based on user authentication status */}
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  {/* Bookmark icon */}
+                  <button className="text-gray-600 hover:text-black focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                  </button>
+                  
+                  {/* Notification bell */}
+                  <button className="text-gray-600 hover:text-black focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                  </button>
+                  
+                  {/* User dropdown */}
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="flex items-center space-x-2 focus:outline-none"
+                    >
+                      {/* User avatar */}
+                      <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white">
+                        {/* You can replace this with an actual image if available */}
+                      </div>
+                      <span className="font-medium">{user.username || 'username'}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {userMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-1 z-50">
+                        <Link 
+                          to="/profile" 
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          {t('user.profile') || 'Profile'}
+                        </Link>
+                        <Link 
+                          to="/settings" 
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          {t('user.settings') || 'Settings'}
+                        </Link>
+                        <div className="border-t border-gray-200 my-1"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-yellow-100"
+                        >
+                          {t('user.logout') || 'Logout'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  to="/signup"
+                  className="bg-[#E7A624] font-bold flex items-center text-black py-2 text-[12px] px-5 rounded-full shadow-md transition duration-300 hover:bg-yellow-600 hover:shadow-lg"
+                  style={{ boxShadow: '0 0 10px rgba(234, 179, 8, 0.5)' }}
+                >
+                  {t('nav.signUp')}
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* 🔄 Mobile Menu */}
+        {/* Mobile Menu */}
         {menuOpen && (
           <div className="md:hidden bg-white shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1">
@@ -127,8 +213,8 @@ const Navbar = () => {
                   {t(['nav.home', 'nav.ideas', 'nav.findPro', 'nav.shops'][index])}
                 </NavLink>
               ))}
-             </div>
-<div className='md:hidden'>
+            </div>
+            <div className='md:hidden px-3 py-2'>
               <div className="flex justify-center mt-2">
                 <button
                   onClick={() => handleLanguageChange('en')}
@@ -144,16 +230,60 @@ const Navbar = () => {
                 </button>
               </div>
 
-              <Link
-                to="/signup"
-                className="block text-center bg-[#E7A624] text-white py-2 mt-2 text-[12px] rounded-full shadow-md transition duration-300 hover:bg-yellow-700 hover:shadow-lg"
-                style={{ boxShadow: '0 0 10px rgba(234, 179, 8, 0.5)' }}
-                onClick={closeMenu}
-              >
-                {t('nav.signUp')}
-              </Link>
-              </div>
-          
+              {/* Conditional rendering for mobile */}
+              {user ? (
+                <div className="mt-3 border-t border-gray-200 pt-3">
+                  <div className="flex justify-between items-center px-3 mb-3">
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white mr-2"></div>
+                      <span className="font-medium">{user.username || 'username'}</span>
+                    </div>
+                    <div className="flex space-x-4">
+                      <button className="text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                      </button>
+                      <button className="text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <Link
+                    to="/profile"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-yellow-100"
+                    onClick={closeMenu}
+                  >
+                    {t('user.profile') || 'Profile'}
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-yellow-100"
+                    onClick={closeMenu}
+                  >
+                    {t('user.settings') || 'Settings'}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-yellow-100"
+                  >
+                    {t('user.logout') || 'Logout'}
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/signup"
+                  className="block text-center bg-[#E7A624] text-white py-2 mt-2 text-[12px] rounded-full shadow-md transition duration-300 hover:bg-yellow-700 hover:shadow-lg"
+                  style={{ boxShadow: '0 0 10px rgba(234, 179, 8, 0.5)' }}
+                  onClick={closeMenu}
+                >
+                  {t('nav.signUp')}
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </nav>
