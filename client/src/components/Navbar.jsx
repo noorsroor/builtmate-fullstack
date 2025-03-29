@@ -149,7 +149,7 @@ console.log(user)
                       <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white">
                         {/* You can replace this with an actual image if available */}
                       </div>
-                      <span className="font-medium">{user.username || 'username'}</span>
+                      <span className="font-medium">{user.firstname +" "+ user.lastname || 'username'}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
