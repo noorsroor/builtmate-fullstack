@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const AppointmentSchema = new mongoose.Schema(
   {
@@ -14,4 +14,4 @@ const AppointmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Appointment", AppointmentSchema);
+module.exports= mongoose.model("Appointment", AppointmentSchema);

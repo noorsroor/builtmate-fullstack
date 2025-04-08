@@ -14,7 +14,6 @@ function HomePage() {
     <IdeasCat/>
     <ProCat/>
     <LocationCat/>
-    <Footer/>
     </>
   )
 }

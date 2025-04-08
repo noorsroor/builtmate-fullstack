@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema(
   {
@@ -15,4 +15,4 @@ const TransactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Transaction", TransactionSchema);
+module.exports= mongoose.model("Transaction", TransactionSchema);

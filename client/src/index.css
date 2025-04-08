@@ -1,7 +1,7 @@
 @import "tailwindcss";
 /* Default font settings */
 body {
-  font-family: 'Almarai', sans-serif; /* Default to Inter for English */
+  font-family: 'Inter', sans-serif;
 }
 
 /* Arabic font settings */
@@ -11,6 +11,7 @@ html[lang="en"] body {
 html[lang="ar"] body {
   font-family: 'Almarai', sans-serif; /* Use Almarai if lang is Arabic */
 }
+
 
 .swiper-pagination-bullet {
     background-color: #E7A624; /* Change to your desired color (gold) */

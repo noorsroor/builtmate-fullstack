@@ -4,7 +4,7 @@
     "ideas": "Get Ideas",
     "findPro": "Find Professional",
     "shops": "Shops",
-    "signUp": "Sign Up"
+    "login": "Login"
   },
   "hero": {
     "titlePart1": "With",
@@ -20,6 +20,11 @@
     "Ideas": "Discover Ideas",
     "findPro": "Find Professionals",
     "shop": "Shop Materials"
+  }, 
+   "user":{
+    "settings": "settings",
+    "profile": "Profile",
+    "logout": "Logout"
   },
     "categories": {
       "title": "Browse Ideas by Room",
@@ -36,16 +41,16 @@
     },
     "professionals": {
       "title": "Find Professional",
-      "interior_designers": "Interior Designers",
-      "general_contractors": "General Contractors",
-      "plumbing_services": "Plumbing Services",
+      "interior_designers": "Interior Designer",
+      "general_contractors": "General Contractor",
+      "plumbing_services": "Plumbing Service",
       "electrical": "Electrical",
       "architects_building": "Architects & Building",
-      "home_builders": "Home Builders",
-      "pool_builders": "Pool Builders",
+      "home_builders": "Home Builder",
+      "pool_builders": "Pool Builder",
       "painters": "Painters",
-      "landscape_contractors": "Landscape Contractors",
-      "door_dealers": "Door Dealers"
+      "landscape_contractors": "Landscape Contractor",
+      "door_dealers": "Door Dealer"
     },
     "locations": {
       "title": "Browse Shops by Location",

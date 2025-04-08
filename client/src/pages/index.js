@@ -8,3 +8,7 @@ export { default as Login } from './Login';
 export { default as Signup } from './Signup';
 export { default as AdminDash } from './AdminDash';
 export { default as ShopsPage } from './ShopsPage';
+export { default as ProDetails } from './ProDetails';
+export { default as ProJoinForm} from './ProJoinForm';
+export { default as AddProjectForm} from './AddProjectForm';
+export { default as subscriptionPlan} from './SubscriptionPlans';

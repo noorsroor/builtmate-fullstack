@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema(
     professionalId: { type: mongoose.Schema.Types.ObjectId, ref: "Professional" },
     messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
     appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }],
-    transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }],
+    subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
     isVerified: { type: Boolean, default: false },
     resetCode: { type: String }, // Stores password reset token
   },
