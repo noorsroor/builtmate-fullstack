@@ -16,7 +16,16 @@ BuildMate is a modern web platform aimed at simplifying the process of home cons
   - Connect with potential clients.
   - List their services and pricing.
 
-### Figma Link
-You can view the complete design on Figma by clicking the link below:
-[BuildMate Figma Design](https://www.figma.com/design/i4wfloPyppcAjDGdKQtlPe/masterPiece?node-id=0-1&t=L3NMg4ETOBQwxPfa-1)
+
+## 📁 Project Resources
+
+Below is a table with all the important resources related to the Builtmate project:
+
+| Resource            | Description                                               | Link                                                                 |
+|---------------------|-----------------------------------------------------------|----------------------------------------------------------------------|
+| 📄 Documentation     | Full project documentation including specs and code       | [View Documentation](https://your-link-to-docs.com)                 |
+| 🎥 Presentation      | Project pitch or demo presentation                        | [View Presentation](https://your-link-to-presentation.com)          |
+| 🎨 Figma Design      | UI/UX wireframes and mockups                              | [View Figma](https://www.figma.com/design/i4wfloPyppcAjDGdKQtlPe/masterPiece?node-id=0-1&t=L3NMg4ETOBQwxPfa-1)                        |
+| ✅ Trello Board       | Project task board, sprint planning, and progress tracking| [View Trello](https://trello.com/invite/b/67f521a20fb481b058629130/ATTI4fb9bf97161b3d5aba966e0725def428999D10F6/bulitmate)                      |
+| 🧾 Project Brief     | One-page project overview with goals and tech summary     | [View Brief](https://your-link-to-brief.com)                        |
 
