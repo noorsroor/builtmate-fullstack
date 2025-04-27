@@ -87,10 +87,16 @@ const ProList = ({ location, category, searchQuery }) => {
     return stars;
   };
 
-  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (loading) return <div className="w-screen h-screen flex items-center mb-30 justify-center"> <div className="relative w-12 h-12 rounded-full bg-transparent border-4 border-gray-200 border-t-amber-500 animate-spin"></div></div>;;
   if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
 
-  console.log(premiumPros)
+  
+    const getInitial = (user) => {
+    if (user && user.firstname) {
+      return user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
   return (
     <div className="mx-4 lg:mx-32 md:mx-16 my-12">
       {professionals.map((pro) => (
@@ -108,11 +114,17 @@ const ProList = ({ location, category, searchQuery }) => {
               <div className="flex flex-col md:flex-row">
                 {/* Profile info */}
                 <div className="flex items-start gap-3">
+                  {pro.userId?.profilePicture? (
                   <img 
                     className="w-12 h-12 rounded-full bg-gray-300 filter grayscale" 
-                    src={pro.userId?.profileImage || './assets/images/user.png'} 
+                    src={pro.userId?.profilePicture || './assets/images/user.png'} 
                     alt="profile image"
                   />
+                  ):(
+                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 filter grayscale">
+                        <span>{getInitial(pro.userId)}</span>
+                        </div>
+                  )}
                   <div className="mt-0 md:mt-0">
                     <p className="flex text-base font-bold mb-0">{pro.userId?.firstname || 'Leen Haddad'}{premiumPros[pro._id] && (<PiSealCheckFill className='text-blue-400 mt-1 ml-2' />)}</p>
                     <div className="flex items-center">

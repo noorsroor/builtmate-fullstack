@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import ReviewModal from '../components/ReviewModal';
+import QuoteModal from "../components/QuoteModal";
 
 const ProDetails = () => {
   const { id } = useParams();
@@ -14,7 +16,70 @@ const ProDetails = () => {
   const [showFullBio, setShowFullBio] = useState(false);
   // const [isSaving, setIsSaving] = useState(false); // To disable button while saving
   const user = useSelector((state) => state.auth.user); // Get current user from Redux
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [visibleCountReviews, setVisibleCountReviews] = useState(4);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const userId = user?._id;
+  const itemId = id;
+  const type = "professional"
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  
 
+  useEffect(() => {
+    const fetchBookmarkStatus = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/bookmarks/${userId}`);
+        const bookmarks = res.data;
+
+        const isSaved = type === "professional"
+          ? bookmarks.professionals.includes(itemId)
+          : bookmarks.projects.includes(itemId);
+
+        setBookmarked(isSaved);
+      } catch (err) {
+        console.error("Error fetching bookmarks:", err);
+      }
+    };
+
+    fetchBookmarkStatus();
+  }, [userId, itemId, type]);
+
+  const toggleBookmark = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/bookmarks/toggle", {
+        userId:user._id,
+        itemId:id,
+        type:"professional",
+      });
+      setBookmarked((prev) => !prev); // Toggle state
+    } catch (err) {
+      console.error("Bookmark failed:", err);
+    }
+  };
+
+
+  const handleSubmitReview = (reviewData) => {
+    handleSubmit(reviewData); // pass the review data directly
+  };
+  
+  const handleSubmit = async (reviewData) => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/reviews", {
+        userId: user._id,
+        professionalId: id,
+        rating: reviewData.rating,
+        comment: reviewData.comment,
+      });
+  
+      setSuccess(true);
+      alert("Review submitted!");
+    } catch (err) {
+      console.error("Error submitting review:", err);
+      alert("Failed to submit review.");
+    }
+  };
 
 
   // In your ProDetails.jsx component
@@ -60,31 +125,6 @@ useEffect(() => {
   fetchProDetails();
 }, [id]);
 
-// const handleSaveProfessional = async () => {
-//   if (!user) {
-//     alert("You must be logged in to save a professional.");
-//     return;
-//   }
-
-//   setIsSaving(true);
-
-//   try {
-//     const response = await axios.post(
-//       `http://localhost:5000/api/bookmarks/toggle`,
-//       { proId: id },
-//       { withCredentials: true } // Ensure cookies (JWT) are sent
-//     );
-
-//     setPro((prevPro) => ({
-//       ...prevPro,
-//       isSaved: response.data.isSaved, // Toggle saved state
-//     }));
-//   } catch (error) {
-//     console.error("Error saving professional:", error);
-//   } finally {
-//     setIsSaving(false);
-//   }
-// };
 
   const scrollToSection = (ref) => {
     if (ref.current) {
@@ -98,11 +138,11 @@ useEffect(() => {
   };
 
   const handleProjectClick = (projectId) => {
-    navigate(`/projects/${projectId}`);
+    navigate(`/ideas/${projectId}`);
   };
 
   if (loading) {
-    return <div className="text-center my-10">Loading...</div>;
+    return <div className="w-screen h-screen flex items-center mb-30 justify-center"> <div className="relative w-12 h-12 rounded-full bg-transparent border-4 border-gray-200 border-t-amber-500 animate-spin"></div></div>;
   }
 
   if (!pro) {
@@ -111,8 +151,16 @@ useEffect(() => {
 
 
 
+  const getInitial = (user) => {
+    if (user && user.name) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
 
   return (
+    <>
     <div className="flex flex-col col-span-12 row-start-2">
       {/* Professional Card */}
       <div className="flex flex-col md:flex-row overflow-hidden mx-4 md:mx-[100px] mt-16 mb-10">
@@ -142,28 +190,19 @@ useEffect(() => {
           <p className="font-bold text-gray-600 mb-2.5">{pro.profession}</p>
           <p className="text-lg text-gray-700 mb-5 mt-2.5">{pro.shortBio}</p>
           <div className="flex gap-5 mt-7">
-            <button className="h-10 w-[260px] flex items-center justify-center gap-2.5 text-sm font-semibold bg-white text-black px-3.5 py-2.5 border border-black rounded-lg overflow-hidden transition-all duration-200 cursor-pointer shadow-[0_0_5px_#ffb520] hover:shadow-[0_0_15px_#ffb520]">
+            <button   onClick={() =>user? setShowQuoteModal(true):  navigate("/login")} className="h-10 w-[260px] flex items-center justify-center gap-2.5 text-sm font-semibold bg-white text-black px-3.5 py-2.5 border border-black rounded-lg overflow-hidden transition-all duration-200 cursor-pointer shadow-[0_0_5px_#ffb520] hover:shadow-[0_0_15px_#ffb520]">
               <i className='bx bxs-envelope text-lg'></i>
-              <span className="block ml-0.5 transition-all duration-700 ease-in-out">Send Message</span>
+              <span className="block ml-0.5 transition-all duration-700 ease-in-out">Request a Quote</span>
             </button>
-            <button
-              // onClick={handleSaveProfessional}
-              className={`px-3.5 py-2.5 rounded-md flex items-center ${
-                pro?.isSaved ? "bg-gray-500" : "bg-[#f4b400] hover:bg-[#d69500]"
-              } text-white`}
-              // disabled={isSaving} // Disable button while saving
-            >save
-              <i className={pro?.isSaved ? "bx bxs-bookmark" : "bx bx-bookmark"}></i>
-              <span className="ml-2">
-                {/* {isSaving ? "Processing..." : pro?.isSaved ? "Saved" : "Save"} */}
-              </span>
+            <button onClick={toggleBookmark} className="bg-[#f4b400] hover:bg-[#d69500] px-3.5 py-2.5 rounded-md flex items-center text-gray-900 cursor-pointer hover:text-black">
+              <i className={bookmarked ? " bx bxs-bookmark" : "bx bx-bookmark"}></i>
             </button>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="sticky top-22 z-[1000] bg-white border-b-2 border-gray-200">
+      <div className="sticky top-22 z-[100] bg-white border-b-2 border-gray-200">
         <div className="flex px-5 mx-4 md:mx-[150px]">
           <button 
             onClick={() => scrollToSection(aboutRef)}
@@ -210,7 +249,7 @@ useEffect(() => {
           <h2 className="text-2xl font-bold mb-5">Projects</h2>
           {pro.projects.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-              {pro.projects.slice(0, 6).map((project) => (
+              {pro.projects.slice(0, visibleCount).map((project) => (
                 <div 
                   key={project._id} 
                   onClick={() => handleProjectClick(project._id)}
@@ -243,11 +282,28 @@ useEffect(() => {
           ) : (
             <p className="text-center text-gray-500">No projects published yet.</p>
           )}
-          {pro.projects.length > 8 && (
+          {/* {pro.projects.length > 6 && (
             <button className="block mx-auto my-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white">
               Load Next Projects
             </button>
-          )}
+          )} */}
+          <div className="text-center mt-5">
+              {visibleCount < pro.projects.length ? (
+                <button
+                  onClick={() => setVisibleCount((prev) => prev + 6)}
+                  className="block curor-pointer mx-auto my-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white"
+                >
+                  Show More
+                </button>
+              ) : pro.projects.length > 6 ? (
+                <button
+                  onClick={() => setVisibleCount(6)}
+                  className="block cursor-pointer mx-auto my-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white"
+                >
+                  Show Less
+                </button>
+              ) : null}
+            </div>
         </div>
       </div>
 
@@ -256,19 +312,31 @@ useEffect(() => {
         <div className="p-5 bg-white mb-2.5 rounded-md border-b border-gray-200 relative">
           <h2 className="text-2xl font-bold mb-5">{pro.rate.totalReviews} Reviews for {pro.name}</h2>
           {user && (
-            <button className="absolute top-5 right-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white">
+            <button onClick={() => setIsModalOpen(true)} className="absolute top-5 right-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white">
               Write a Review
             </button>
           )}
           {pro.reviews.length > 0 ? (
-            pro.reviews.map((review) => (
+            pro.reviews.slice(0, visibleCountReviews).map((review) => (
               <div key={review._id} className="border-t border-gray-200 py-5">
                 <div className="flex items-center gap-4">
-                  <img 
+                  {/* <img 
                     src={review.user?.profileImage || "https://via.placeholder.com/50"} 
                     alt={review.user?.name || "Anonymous"} 
                     className="w-12 h-12 rounded-full"
+                  /> */}
+
+                  {review.user?.profileImage? (
+                  <img 
+                    className="w-12 h-12 rounded-full bg-gray-300 filter grayscale" 
+                    src={review.user?.profileImage || './assets/images/user.png'} 
+                    alt="profile image"
                   />
+                  ):(
+                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 filter grayscale">
+                        <span>{getInitial(review.user)}</span>
+                        </div>
+                  )}
                   <div>
                     <h3 className="text-base font-bold">{review.user?.name || "Anonymous"}</h3>
                     <p className="text-yellow-500">{review.rating} ★</p>
@@ -288,8 +356,38 @@ useEffect(() => {
             <p className="text-center text-gray-500">No reviews yet.</p>
           )}
         </div>
+        <div className="text-center mt-5">
+              {visibleCountReviews < pro.reviews.length ? (
+                <button
+                  onClick={() => setVisibleCountReviews((prev) => prev + 6)}
+                  className="block curor-pointer mx-auto my-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white"
+                >
+                  Show More
+                </button>
+              ) : pro.reviews.length > 6 ? (
+                <button
+                  onClick={() => setVisibleCountReviews(6)}
+                  className="block cursor-pointer mx-auto my-5 px-5 py-2.5 font-semibold text-sm bg-gray-200 border border-black rounded-md cursor-pointer hover:bg-black hover:text-white"
+                >
+                  Show Less
+                </button>
+              ) : null}
+            </div>
       </div>
     </div>
+    <ReviewModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmitReview}
+      />
+      {showQuoteModal && (
+  <QuoteModal
+    onClose={() => setShowQuoteModal(false)}
+    professional={pro} // the professional data
+    userId={userId}
+  />
+)}
+    </>
   );
 };
 

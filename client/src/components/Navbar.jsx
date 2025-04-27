@@ -67,6 +67,17 @@ console.log(user)
     }
   };
 
+  const handleGoBookmark= () => {
+    navigate(`/profile`);
+  };
+
+  const getInitial = () => {
+    if (user && user.firstname) {
+      return user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
   return (
     <>
       <nav className="bg-white shadow-md backdrop-blur-md bg-white/95 sticky top-0 z-50 border-b border-gray-100 shadow-sm">
@@ -91,7 +102,7 @@ console.log(user)
             </div>
 
             {/* Links for Desktop */}
-            <div className="hidden md:flex items-center space-x-8 bg-white">
+            <div className="hidden md:flex items-center space-x-8 ">
       {["/", "/ideas", "/findPro", "/shops"].map((path, index) => (
         <NavLink
           key={path}
@@ -156,14 +167,14 @@ console.log(user)
               {user ? (
                 <div className="flex items-center space-x-4">
                   {/* Bookmark icon */}
-                  <button className="text-black cursor-pointer hover:text-yellow-500 text-[16px] focus:outline-none">
+                  <button onClick={() => handleGoBookmark()} className="text-black cursor-pointer hover:text-yellow-500 text-[16px] focus:outline-none">
                    <FaBookmark/>
                   </button>
                   
                   {/* Notification bell */}
-                  <button className="text-black cursor-pointer hover:text-yellow-500 text-[20px]  focus:outline-none">
+                  {/* <button className="text-black cursor-pointer hover:text-yellow-500 text-[20px]  focus:outline-none">
                     <IoNotifications/>
-                  </button>
+                  </button> */}
                   
                   {/* User dropdown */}
                   <div className="relative" ref={userMenuRef}>
@@ -171,10 +182,20 @@ console.log(user)
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="flex items-center space-x-2 focus:outline-none"
                     >
+                      
                       {/* User avatar */}
-                      <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white">
-                        {/* You can replace this with an actual image if available */}
-                      </div>
+                      {user?.profilePicture ?(
+                      <img 
+                    className="w-10 h-10 rounded-full bg-gray-300 filter grayscale" 
+                    src={user?.profilePicture || './assets/images/user.png'} 
+                    alt="profile image"
+                  />
+                      ):(
+                        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 filter grayscale">
+                        <span>{getInitial()}</span>
+                        </div>
+                      )}
+                      
                       <span className="font-medium">{user.firstname +" "+ user.lastname || 'username'}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -182,7 +203,7 @@ console.log(user)
                     </button>
 
                     {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-1 z-50">
+                      <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-1 z-[500]">
                         <Link 
                           to="/profile" 
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -190,13 +211,13 @@ console.log(user)
                         >
                           {t('user.profile') || 'Profile'}
                         </Link>
-                        <Link 
+                        {/* <Link 
                           to="/settings" 
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           {t('user.settings') || 'Settings'}
-                        </Link>
+                        </Link> */}
                         <div className="border-t border-gray-200 my-1"></div>
                         <button
                           onClick={handleLogout}

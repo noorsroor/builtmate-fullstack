@@ -3,6 +3,7 @@ const User = require("../models/UserModel");
 const Project = require("../models/ProjectModel"); // ✅ Add this
 const Review = require("../models/ReviewModel"); // ✅ Add this
 const Shop = require("../models/ShopModel"); // ✅ Add this
+const cloudinary = require("../utils/cloudinary");
 
 
 //🟥 Get all pros
@@ -38,7 +39,6 @@ const getProfessionals = async (req, res) => {
             .populate({ path: "userId", select: "firstname lastname profilePicture email" })
             .populate("projects")
             .populate("reviews")
-            .populate("linkedShops")
             .sort({ "rating.average": -1 })
             .skip((page - 1) * pageSize)
             .limit(pageSize);
@@ -87,7 +87,7 @@ const getProfessionalDetails = async (req, res) => {
 
     // Safely handle missing user data
     if (!professional.userId) {
-      return res.status(404).json({ message: "User not found for this professional" });
+      return res.status(404).json({ message: "User not found for this professional"+professional.userId });
     }
 
     // Calculate average rating with null check
@@ -167,11 +167,15 @@ const createProfessional = async (req, res) => {
       bio,
       portfolio,
       certifications,
-      backgroundImage,
-      linkedShops,
+      paymentInfo // 🆕 from frontend (optional)
     } = req.body;
 
-    // 1. Create Professional
+    // Upload background image to Cloudinary
+    const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'professionals/backgrounds',
+    });
+
+    // Create new professional profile
     const newPro = await Professional.create({
       userId,
       profession,
@@ -182,11 +186,11 @@ const createProfessional = async (req, res) => {
       bio,
       portfolio,
       certifications,
-      backgroundImage,
-      linkedShops,
+      backgroundImage: uploadedImage.secure_url,
+      paymentInfo// 🆕 Store payment info if available
     });
 
-    // 2. Update User to reference the Pro
+    // Update User model to reference the created Professional
     await User.findByIdAndUpdate(userId, { professionalId: newPro._id });
 
     res.status(201).json({ message: "Professional profile created", professional: newPro });
@@ -195,5 +199,6 @@ const createProfessional = async (req, res) => {
     res.status(500).json({ error: "Failed to create professional profile" });
   }
 };
+
 
 module.exports = { addProfessional, getProfessionals, getProfessionalDetails, createProfessional };

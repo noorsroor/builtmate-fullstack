@@ -125,113 +125,163 @@
 //   }
 // };
 
-const Bookmark = require("../models/Bookmark");
+// const Bookmark = require("../models/Bookmark");
 
-// ✅ Add a professional to bookmarks
-exports.addProfessionalToBookmarks = async (req, res) => {
-    try {
-        const { proId } = req.body;
-        const userId = req.user.id; // Extract user ID from auth middleware
+// // ✅ Add a professional to bookmarks
+// exports.addProfessionalToBookmarks = async (req, res) => {
+//     try {
+//         const { proId } = req.body;
+//         const userId = req.user.id; // Extract user ID from auth middleware
 
-        let bookmark = await Bookmark.findOne({ user: userId });
+//         let bookmark = await Bookmark.findOne({ user: userId });
 
-        if (!bookmark) {
-            bookmark = new Bookmark({ user: userId, professionals: [], projects: [] });
-        }
+//         if (!bookmark) {
+//             bookmark = new Bookmark({ user: userId, professionals: [], projects: [] });
+//         }
 
-        if (!bookmark.professionals.includes(proId)) {
-            bookmark.professionals.push(proId);
-            await bookmark.save();
-            return res.status(200).json({ message: "Professional bookmarked successfully" });
-        }
+//         if (!bookmark.professionals.includes(proId)) {
+//             bookmark.professionals.push(proId);
+//             await bookmark.save();
+//             return res.status(200).json({ message: "Professional bookmarked successfully" });
+//         }
 
-        res.status(400).json({ message: "Professional already bookmarked" });
-    } catch (error) {
-        res.status(500).json({ message: "Failed to add professional to bookmarks", error: error.message });
+//         res.status(400).json({ message: "Professional already bookmarked" });
+//     } catch (error) {
+//         res.status(500).json({ message: "Failed to add professional to bookmarks", error: error.message });
+//     }
+// };
+
+// // ✅ Remove a professional from bookmarks
+// exports.removeProfessionalFromBookmarks = async (req, res) => {
+//     try {
+//         const { proId } = req.body;
+//         const userId = req.user.id;
+
+//         const bookmark = await Bookmark.findOne({ user: userId });
+
+//         if (!bookmark) {
+//             return res.status(404).json({ message: "No bookmarks found" });
+//         }
+
+//         bookmark.professionals = bookmark.professionals.filter(id => id.toString() !== proId);
+//         await bookmark.save();
+
+//         res.status(200).json({ message: "Professional removed from bookmarks" });
+//     } catch (error) {
+//         res.status(500).json({ message: "Failed to remove professional", error: error.message });
+//     }
+// };
+
+// // ✅ Add a project to bookmarks
+// exports.addProjectToBookmarks = async (req, res) => {
+//     try {
+//         const { projectId } = req.body;
+//         const userId = req.user.id;
+
+//         let bookmark = await Bookmark.findOne({ user: userId });
+
+//         if (!bookmark) {
+//             bookmark = new Bookmark({ user: userId, professionals: [], projects: [] });
+//         }
+
+//         if (!bookmark.projects.includes(projectId)) {
+//             bookmark.projects.push(projectId);
+//             await bookmark.save();
+//             return res.status(200).json({ message: "Project bookmarked successfully" });
+//         }
+
+//         res.status(400).json({ message: "Project already bookmarked" });
+//     } catch (error) {
+//         res.status(500).json({ message: "Failed to add project to bookmarks", error: error.message });
+//     }
+// };
+
+// // ✅ Remove a project from bookmarks
+// exports.removeProjectFromBookmarks = async (req, res) => {
+//     try {
+//         const { projectId } = req.body;
+//         const userId = req.user.id;
+
+//         const bookmark = await Bookmark.findOne({ user: userId });
+
+//         if (!bookmark) {
+//             return res.status(404).json({ message: "No bookmarks found" });
+//         }
+
+//         bookmark.projects = bookmark.projects.filter(id => id.toString() !== projectId);
+//         await bookmark.save();
+
+//         res.status(200).json({ message: "Project removed from bookmarks" });
+//     } catch (error) {
+//         res.status(500).json({ message: "Failed to remove project", error: error.message });
+//     }
+// };
+
+// // ✅ Get all bookmarked professionals and projects for a user
+// exports.getBookmarks = async (req, res) => {
+//     try {
+//         const userId = req.user.id;
+//         const bookmarks = await Bookmark.findOne({ user: userId })
+//             .populate("professionals", "name profileImage") // Populate professional details
+//             .populate("projects", "title image"); // Populate project details
+
+//         if (!bookmarks) {
+//             return res.status(404).json({ message: "No bookmarks found" });
+//         }
+
+//         res.status(200).json({ bookmarks });
+//     } catch (error) {
+//         res.status(500).json({ message: "Failed to retrieve bookmarks", error: error.message });
+//     }
+// };
+
+// controllers/bookmarkController.js
+// const Bookmark = require("../models/Bookmark");
+
+//🟥ADD /Remove user project/pro bookmarks
+const toggleBookmark = async (req, res) => {
+    const { userId, itemId, type } = req.body;
+  
+    if (!["professional", "project"].includes(type)) {
+      return res.status(400).json({ error: "Invalid bookmark type." });
     }
-};
-
-// ✅ Remove a professional from bookmarks
-exports.removeProfessionalFromBookmarks = async (req, res) => {
+  
     try {
-        const { proId } = req.body;
-        const userId = req.user.id;
-
-        const bookmark = await Bookmark.findOne({ user: userId });
-
-        if (!bookmark) {
-            return res.status(404).json({ message: "No bookmarks found" });
-        }
-
-        bookmark.professionals = bookmark.professionals.filter(id => id.toString() !== proId);
-        await bookmark.save();
-
-        res.status(200).json({ message: "Professional removed from bookmarks" });
-    } catch (error) {
-        res.status(500).json({ message: "Failed to remove professional", error: error.message });
+      let bookmark = await Bookmark.findOne({ user: userId });
+  
+      if (!bookmark) {
+        bookmark = await Bookmark.create({ user: userId });
+      }
+  
+      const list = type === "professional" ? bookmark.professionals : bookmark.projects;
+      const index = list.indexOf(itemId);
+  
+      if (index === -1) {
+        list.push(itemId); // Add
+      } else {
+        list.splice(index, 1); // Remove
+      }
+  
+      await bookmark.save();
+      res.status(200).json({ message: "Bookmark toggled", bookmark });
+    } catch (err) {
+      console.error("Toggle Bookmark Error:", err);
+      res.status(500).json({ error: "Failed to toggle bookmark" });
     }
-};
+  };
 
-// ✅ Add a project to bookmarks
-exports.addProjectToBookmarks = async (req, res) => {
+//🟥 Get User Project/pro bookmarks
+  const getUserBookmarks = async (req, res) => {
     try {
-        const { projectId } = req.body;
-        const userId = req.user.id;
-
-        let bookmark = await Bookmark.findOne({ user: userId });
-
-        if (!bookmark) {
-            bookmark = new Bookmark({ user: userId, professionals: [], projects: [] });
-        }
-
-        if (!bookmark.projects.includes(projectId)) {
-            bookmark.projects.push(projectId);
-            await bookmark.save();
-            return res.status(200).json({ message: "Project bookmarked successfully" });
-        }
-
-        res.status(400).json({ message: "Project already bookmarked" });
+      const { userId } = req.params;
+      const bookmarks = await Bookmark.findOne({ user: userId });
+      if (!bookmarks) return res.json({ professionals: [], projects: [] });
+  
+      res.json(bookmarks);
     } catch (error) {
-        res.status(500).json({ message: "Failed to add project to bookmarks", error: error.message });
+      console.error("Fetch bookmarks error:", error);
+      res.status(500).json({ error: "Failed to fetch bookmarks" });
     }
-};
+  };
 
-// ✅ Remove a project from bookmarks
-exports.removeProjectFromBookmarks = async (req, res) => {
-    try {
-        const { projectId } = req.body;
-        const userId = req.user.id;
-
-        const bookmark = await Bookmark.findOne({ user: userId });
-
-        if (!bookmark) {
-            return res.status(404).json({ message: "No bookmarks found" });
-        }
-
-        bookmark.projects = bookmark.projects.filter(id => id.toString() !== projectId);
-        await bookmark.save();
-
-        res.status(200).json({ message: "Project removed from bookmarks" });
-    } catch (error) {
-        res.status(500).json({ message: "Failed to remove project", error: error.message });
-    }
-};
-
-// ✅ Get all bookmarked professionals and projects for a user
-exports.getBookmarks = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const bookmarks = await Bookmark.findOne({ user: userId })
-            .populate("professionals", "name profileImage") // Populate professional details
-            .populate("projects", "title image"); // Populate project details
-
-        if (!bookmarks) {
-            return res.status(404).json({ message: "No bookmarks found" });
-        }
-
-        res.status(200).json({ bookmarks });
-    } catch (error) {
-        res.status(500).json({ message: "Failed to retrieve bookmarks", error: error.message });
-    }
-};
-
+module.exports = { toggleBookmark ,getUserBookmarks};

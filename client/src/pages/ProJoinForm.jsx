@@ -8,8 +8,9 @@ const ProJoinForm = () => {
   const user= useSelector((state) => state.auth.user);
   const loggedInUserId= user._id;
 
+  console.log(loggedInUserId)
   const [formData, setFormData] = useState({
-    profession: 'Plumber',
+    profession: 'Interior Designer',
     experience: 5,
     location: 'Amman, Jordan',
     pricePerHour: 20,
@@ -19,6 +20,12 @@ const ProJoinForm = () => {
     certifications: [],
     backgroundImage: '',
     linkedShops: [],
+    paymentInfo: {
+      method: 'stripe',
+      payoutEmail: '',
+      stripeAccountId: '',
+      country: ''
+    }
   });
 
   useEffect(() => {
@@ -28,14 +35,26 @@ const ProJoinForm = () => {
   }, [user]);
 
   const handleSubmit = async () => {
-
     try {
-      const res = await axios.post("http://localhost:5000/api/professionals/create", {
-        ...formData,
-        userId: loggedInUserId,
-        isOrganization: formData.isOrganization ? "organization" : "individual"
+      const form = new FormData();
+      form.append("userId", loggedInUserId);
+      form.append("profession", formData.profession);
+      form.append("experience", formData.experience);
+      form.append("location", formData.location);
+      form.append("pricePerHour", formData.pricePerHour);
+      form.append("isOrganization", formData.isOrganization ? "organization" : "individual");
+      form.append("bio", formData.bio);
+      form.append("portfolio", JSON.stringify(formData.portfolio));
+      form.append("certifications", JSON.stringify(formData.certifications));
+      form.append("paymentInfo", JSON.stringify(formData.paymentInfo));
+      form.append("backgroundImage", formData.backgroundImage); // Must be a File object
+  
+      const res = await axios.post("http://localhost:5000/api/professionals/create", form, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
       });
-
+  
       alert("Professional profile created!");
       setCurrentStep(currentStep + 1);
       console.log(res.data.professional);
@@ -53,6 +72,28 @@ const ProJoinForm = () => {
     });
   };
 
+  // Handler for changing payment method
+const handlePaymentMethodChange = (method) => {
+  setFormData({
+    ...formData,
+    paymentInfo: {
+      ...formData.paymentInfo,
+      method: method
+    }
+  });
+};
+
+// Handler for changing payment info fields
+const handlePaymentInfoChange = (field, value) => {
+  setFormData({
+    ...formData,
+    paymentInfo: {
+      ...formData.paymentInfo,
+      [field]: value
+    }
+  });
+};
+ console.log(formData)
   const handleToggle = (field, value) => {
     setFormData({
       ...formData,
@@ -60,19 +101,7 @@ const ProJoinForm = () => {
     });
   };
 
-  // const handleAreaToggle = (area) => {
-  //   if (formData.functionalAreas.includes(area)) {
-  //     setFormData({
-  //       ...formData,
-  //       functionalAreas: formData.functionalAreas.filter(item => item !== area)
-  //     });
-  //   } else {
-  //     setFormData({
-  //       ...formData,
-  //       functionalAreas: [...formData.functionalAreas, area]
-  //     });
-  //   }
-  // };
+
 
   const handleFileUpload = (field, files) => {
     // For demonstration purposes only, in a real app you'd handle file uploads differently
@@ -113,7 +142,7 @@ const ProJoinForm = () => {
       case 2:
         return renderProfileDetails();
       case 3:
-        return renderServicesPreferences();
+        return renderPaymentInfo();
       case 4:
         return renderCompleted();
       default:
@@ -138,15 +167,15 @@ const ProJoinForm = () => {
             >
               <option>Interior Designer</option>
               <option>General Contractor</option>
-              <option>Plumbing Service</option>
-              <option>Electrician</option>
+              {/* <option >Plumbing Service</option>
+              <option>Electrician</option> */}
               <option>Architects & Building</option>
-              <option>Home Builder</option>
+              {/* <option>Home Builder</option>
               <option>Pool Builder</option>
               <option>Painters</option>
               <option>Landscape Contractor</option>
               <option>Architect</option>
-              <option>Door Dealer</option>
+              <option>Door Dealer</option> */}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,12 +376,12 @@ const ProJoinForm = () => {
         <div className="mb-6">
           <label className="block text-gray-600 mb-2 text-sm">Background Image</label>
           <div className="border-dashed border-2 border-gray-300 rounded-md p-6 text-center">
-            <input 
-              type="file" 
-              id="backgroundImage" 
-              className="hidden"
+                      <input
+              type="file"
               accept="image/*"
-              onChange={(e) => handleFileUpload('backgroundImage', e.target.files)} 
+              onChange={(e) =>
+                setFormData({ ...formData, backgroundImage: e.target.files[0] })
+              }
             />
             <label htmlFor="backgroundImage" className="cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -372,74 +401,94 @@ const ProJoinForm = () => {
     );
   };
 
-  const renderServicesPreferences = () => {
+  const renderPaymentInfo = () => {
     return (
       <div className="bg-white p-8 rounded-lg shadow-sm flex-1 mb-6 md:mb-0">
-        <h2 className="font-medium text-lg mb-6">Services & Preferences</h2>
-
+        <h2 className="font-medium text-lg mb-6">Payment Information</h2>
+        
         <div className="mb-6">
-          <label className="block text-gray-600 mb-2 text-sm">Select your functional areas</label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {["Residential", "Commercial", "Industrial", "Renovation", "New Construction", "Emergency Services", "Maintenance"].map((area) => (
-              <button 
-                key={area}
-                type="button"
-                className={`flex items-center px-4 py-2 rounded-md border text-sm `}
-              >
-                <span className={`mr-2`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
-                    <line x1="9.69" y1="8" x2="21.17" y2="8"></line>
-                    <line x1="7.38" y1="12" x2="13.12" y2="2.06"></line>
-                    <line x1="9.69" y1="16" x2="3.95" y2="6.06"></line>
-                    <line x1="14.31" y1="16" x2="2.83" y2="16"></line>
-                    <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
-                  </svg>
-                </span>
-                {area}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-600 mb-2 text-sm">Linked Shops (optional)</label>
-          <input 
-            type="text" 
-            name="linkedShops"
-            value={formData.linkedShops}
-            onChange={handleInputChange}
-            className="border rounded-md px-4 py-2 w-full"
-            placeholder="Enter your preferred shop or supply source"
-          />
-          <p className="text-xs text-gray-500 mt-1">This will be auto-filled later by admin if left blank</p>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-600 mb-2 text-sm">Booking Preferences</label>
+          <label className="block text-gray-600 mb-2 text-sm">Payment Method</label>
           <div className="flex gap-4">
-            <button 
+            <button
               type="button"
-              onClick={() => handleToggle('acceptBookings', true)}
-              className={`px-4 py-2 rounded-md border `}
+              onClick={() => handlePaymentMethodChange('stripe')}
+              className={`px-4 py-2 rounded-md border ${formData.paymentInfo.method === 'stripe' ? 'bg-yellow-500 text-white' : ''}`}
             >
-              Accept Bookings
+              Stripe
             </button>
-            <button 
+            <button
               type="button"
-              onClick={() => handleToggle('acceptBookings', false)}
-              className={`px-4 py-2 rounded-md border `}
+              onClick={() => handlePaymentMethodChange('paypal')}
+              className={`px-4 py-2 rounded-md border ${formData.paymentInfo.method === 'paypal' ? 'bg-yellow-500 text-white' : ''}`}
             >
-              Do Not Accept Bookings
+              PayPal
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-1">You can change this setting later</p>
+          <p className="text-xs text-gray-500 mt-1">Select your preferred payment method</p>
         </div>
+        
+        {/* Common fields for both payment methods */}
+        {formData.paymentInfo.method === 'paypal' && (
+        <div className="mb-6">
+          <label className="block text-gray-600 mb-2 text-sm">Payout Email</label>
+          <input
+            type="email"
+            name="payoutEmail"
+            value={formData.paymentInfo.payoutEmail}
+            onChange={(e) => handlePaymentInfoChange('payoutEmail', e.target.value)}
+            className="border rounded-md px-4 py-2 w-full"
+            placeholder="Enter your payout email address"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {formData.paymentInfo.method === 'paypal' 
+              ? 'PayPal email address where you will receive payments' 
+              : 'Email address associated with your Stripe account'}
+          </p>
+        </div>
+        )}
+
+        {/* Stripe-specific field */}
+        {formData.paymentInfo.method === 'stripe' && (
+          <div className="mb-6">
+            <label className="block text-gray-600 mb-2 text-sm">Stripe Account ID</label>
+            <input
+              type="text"
+              name="stripeAccountId"
+              value={formData.paymentInfo.stripeAccountId}
+              onChange={(e) => handlePaymentInfoChange('stripeAccountId', e.target.value)}
+              className="border rounded-md px-4 py-2 w-full"
+              placeholder="Enter your Stripe account ID"
+            />
+            <p className="text-xs text-gray-500 mt-1">Your Stripe Connect account ID (starts with acct_)</p>
+          </div>
+        )}
+
+        <div className="mb-6">
+          <label className="block text-gray-600 mb-2 text-sm">Country</label>
+          <input
+            type="text"
+            name="country"
+            value={formData.paymentInfo.country}
+            onChange={(e) => handlePaymentInfoChange('country', e.target.value)}
+            className="border rounded-md px-4 py-2 w-full"
+            placeholder="Enter your country"
+          />
+          <p className="text-xs text-gray-500 mt-1">Country where your payment account is registered</p>
+        </div>
+        
+        
+        
+        {/* PayPal-specific information */}
+        {formData.paymentInfo.method === 'paypal' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+            <p className="text-sm text-blue-700">
+              <span className="font-medium">Note:</span> Make sure your PayPal account is verified and can receive payments internationally.
+            </p>
+          </div>
+        )}
       </div>
     );
   };
-
   const renderCompleted = () => {
     console.log(formData);
     return (

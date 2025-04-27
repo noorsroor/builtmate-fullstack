@@ -1,25 +1,20 @@
-const nodemailer  = require( "nodemailer");
-const dotenv  = require( "dotenv");
+const nodemailer = require("nodemailer");
 
-dotenv.config();
+const transporter = nodemailer.createTransport({
+  service: "gmail", // or your email provider
+  auth: {
+    user: process.env.EMAIL_USER, // e.g., 'yourapp@gmail.com'
+    pass: process.env.EMAIL_PASS, // app password from Gmail or real SMTP password
+  },
+});
 
-const sendEmail = async (to, subject, html) => {
-  const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    auth: {
-      user: process.env.EMAIL_USER, // Your email
-      pass: process.env.EMAIL_PASS, // Your email password or app password
-    },
-  });
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
+const sendEmail = async ({ to, subject, html }) => {
+  await transporter.sendMail({
+    from: `"Builtmate" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 };
 
-module.exports= sendEmail;
+module.exports = sendEmail;

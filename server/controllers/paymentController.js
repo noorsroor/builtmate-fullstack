@@ -114,6 +114,7 @@
 const Payment = require("../models/PaymentMethod");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
+
 exports.processPayment = async (req, res) => {
   try {
     const { userId, planType, amount } = req.body;

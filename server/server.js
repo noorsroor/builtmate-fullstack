@@ -12,6 +12,12 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const professionalRoutes = require("./routes/professionalRoutes");
 const bookmarkRoutes = require('./routes/bookmarkRoutes');
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const uploadRoute = require('./routes/uploadRoute');
+const projectRoutes = require('./routes/projectRoutes')
+const reviewRoutes = require("./routes/reviewRoutes")
+const userRoutes = require("./routes/userRoutes")
+const bookingRoutes = require("./routes/bookingRoutes");
+const payment = require("./routes/payment");
 
 // Load environment variables
 dotenv.config();
@@ -43,7 +49,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/professionals", professionalRoutes);
-app.use("/api/bookmarks", bookmarkRoutes);
+app.use('/api/bookmarks', bookmarkRoutes );
+app.use('/api', uploadRoute);
+app.use('/api', projectRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/payment", payment);
 
 // Server Listening
 const PORT = process.env.PORT || 5000;

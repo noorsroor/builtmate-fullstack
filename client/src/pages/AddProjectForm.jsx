@@ -1,4 +1,7 @@
 import React, { useState, useRef } from 'react';
+import axios from 'axios'
+import {  useSelector } from 'react-redux';
+import Swal from "sweetalert2";
 
 const AddProjectForm = () => {
   const [dataForm, setDataForm] = useState({
@@ -12,15 +15,23 @@ const AddProjectForm = () => {
   const [currentTag, setCurrentTag] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const fileInputRef = useRef(null);
-
+  const user = useSelector((state) => state.auth.user); // Get current user from Redux
+  const proId = user.professionalId;
+  
+  
   // Categories for the dropdown
   const categories = [
-    'Interior Design',
-    'Construction',
-    'Architecture',
-    'Landscape Design',
-    'Industrial Design',
-    'Renovation'
+    "Kitchen",
+    "Bedroom",
+     "Bathroom",
+     "Living Room",
+    "Dining",
+    "Outdoor",
+    "Baby & Kids",
+    "Home Office",
+    "Storage & Closet",
+      "Laundry",
+      "Another"
   ];
 
   const handleInputChange = (e) => {
@@ -31,12 +42,15 @@ const AddProjectForm = () => {
     });
   };
 
+
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setDataForm({
       ...dataForm,
       images: [...dataForm.images, ...files]
     });
+
   };
 
   const handleTagKeyDown = (e) => {
@@ -85,20 +99,61 @@ const AddProjectForm = () => {
     e.preventDefault();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async  (e) => {
     e.preventDefault();
-    console.log('Form data submitted:', dataForm);
     setSubmitted(true);
-    
-    // In a real application, you would send this data to your backend
-    setTimeout(() => {
-      setSubmitted(false);
-      alert('Project saved successfully!');
-    }, 1500);
+    try {
+      const formData = new FormData();
+      formData.append("title", dataForm.title);
+      formData.append("description", dataForm.description);
+      formData.append("category", dataForm.category);
+      formData.append("tags", dataForm.tags); // comma-separated
+      formData.append("professionalId", proId);
+
+      for (let i = 0; i < dataForm.images.length; i++) {
+        formData.append("images", dataForm.images[i]);
+      }
+
+      const res = await axios.post("http://localhost:5000/api/projects", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      console.log("Project uploaded:", res.data);
+      
+      setTimeout(() => {
+        
+        setSubmitted(false);
+        Swal.fire({
+          icon: 'success',
+          title: 'Project submitted!',
+          text: 'Your project was uploaded successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+  
+        // Reset the form
+        setDataForm({
+          title: '',
+          description: '',
+          images: [],
+          category: '',
+          tags: []
+        });
+      }, 2000);
+
+
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission Failed',
+        text: error.response?.data?.message || 'Something went wrong',
+      });
+      console.error("Upload error:", error.response?.data || error.message);
+    }
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-gray-50 rounded-lg">
+    <div className="max-w-6xl my-10 mx-auto p-4 bg-gray-50 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Project</h2>
       
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -134,6 +189,7 @@ const AddProjectForm = () => {
               name="description"
               value={dataForm.description}
               onChange={handleInputChange}
+              maxLength={250}
               rows="5"
               className="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-300"
               required
@@ -211,7 +267,7 @@ const AddProjectForm = () => {
           <div>
             <button
               type="submit"
-              className={`px-6 py-3 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${submitted ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`px-6 py-3 bg-yellow-600 cursor-pointer text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${submitted ? 'opacity-70 cursor-not-allowed' : ''}`}
               disabled={submitted}
             >
               {submitted ? (

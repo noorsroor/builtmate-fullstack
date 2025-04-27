@@ -1,5 +1,6 @@
 import {createBrowserRouter , RouterProvider} from "react-router-dom";
 import {Navbar} from './components/Navbar'
+import ScrollToTop from "./components/scrollToTop";
 import './index.css'
 import {
   AboutPage,
@@ -14,6 +15,7 @@ import {
   ProDetails,
   ProJoinForm,
   ShopsPage,
+  IdeasDetails,
   AddProjectForm
 } from './pages'
 import React, { useEffect } from 'react';
@@ -42,6 +44,7 @@ function App() {
       path:'/',
       element: (
         <>
+         <ScrollToTop />
           <Navbar />
           <Footer />
         </>
@@ -62,6 +65,10 @@ function App() {
         {
           path:'/ideas',
           element: <IdeasPage/>
+        },
+        {
+          path:'/ideas/:id',
+          element: <IdeasDetails/>
         },
         {
           path:'/contact',
