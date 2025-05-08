@@ -7,7 +7,14 @@ const parser = require('../middleware/upload'); // Multer + Cloudinary config
 router.get("/:id", userController.getUserInfo);
 
 // PUT update user info
-router.put("/:id",parser.single("profileImage"), userController.updateUserInfo);
+router.put(
+    "/:id",
+    parser.fields([
+      { name: 'profileImage', maxCount: 1 },
+      { name: 'backgroundImage', maxCount: 1 }
+    ]),
+    userController.updateUserInfo
+  );
 
 // GET bookmarks
 router.get("/bookmarks/:id", userController.getUserBookmarks);

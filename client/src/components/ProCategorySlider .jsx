@@ -9,8 +9,8 @@ const ProfessionalCategorySlider = ({ onCategoryChange }) => {
     { id:1, name: t("professionals.interior_designers"), image: "https://i.pinimg.com/736x/e7/02/7d/e7027defe58d7d363d8b260a6cf20e6c.jpg" },
     { id:2, name: t("professionals.general_contractors"), image: "https://i.pinimg.com/736x/d4/0d/a8/d40da859cac1fb563844ac8efc83a4b7.jpg" },
     { id:3, name: t("professionals.architects_building"), image: "https://i.pinimg.com/736x/1d/89/23/1d8923047edf67493152e909bd4baed1.jpg" },
-    { id:4, name: t("professionals.plumbing_services"), image: "https://i.pinimg.com/736x/c9/ca/23/c9ca23330fd66eef3cc6003d2d7a4af5.jpg" },
-    { id:5, name: t("professionals.electrical"), image: "https://i.pinimg.com/736x/8d/f3/68/8df368bf2471b787f4ae68639016d9aa.jpg" },
+    { id:4, name: "Full Construction Package", image: "https://m.media-amazon.com/images/I/61gvaMnzsbL._SY466_.jpg" },
+    { id:5, name: "Pre-fabricated Home", image: "https://www.letsbuild.com/wp-content/uploads/2023/09/modular-construction.jpg" },
     { id:6, name: t("professionals.home_builders"), image: "https://i.pinimg.com/736x/b6/d8/28/b6d82870d22546dff034d28dd93c762a.jpg" },
     { id:7, name: t("professionals.pool_builders"), image: "https://i.pinimg.com/736x/06/a1/54/06a15408967fe2af8c18413fe232301f.jpg" },
     { id:8, name: t("professionals.painters"), image: "https://i.pinimg.com/736x/bc/d3/9a/bcd39a2ee9a9af16a764d4fec0c5b8f7.jpg" },
@@ -84,7 +84,7 @@ const ProfessionalCategorySlider = ({ onCategoryChange }) => {
                 alt={category.name}
                 className="h-36 sm:h-44 md:h-56 w-36 sm:w-44 md:w-52 px-1 rounded-[20px] object-cover"
               />
-              <div className="text-sm sm:text-base font-bold mt-3 text-center px-2 max-w-full truncate">
+              <div className="text-sm  font-bold mt-3 text-center px-2 max-w-full truncate">
                 {category.name}
               </div>
             </article>

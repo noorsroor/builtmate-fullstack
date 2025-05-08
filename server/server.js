@@ -18,7 +18,9 @@ const reviewRoutes = require("./routes/reviewRoutes")
 const userRoutes = require("./routes/userRoutes")
 const bookingRoutes = require("./routes/bookingRoutes");
 const payment = require("./routes/payment");
-
+const adminRoutes = require("./routes/adminRoutes")
+const adminUsersRoutes = require("./routes/adminUserRoutes")
+const adminProfessionalRoutes = require ("./routes/adminProRoutes");
 // Load environment variables
 dotenv.config();
 
@@ -56,6 +58,9 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payment", payment);
+app.use("/api/admin", adminRoutes);
+app.use("/api/admin/users", adminUsersRoutes);
+app.use('/api/admin/professionals', adminProfessionalRoutes);
 
 // Server Listening
 const PORT = process.env.PORT || 5000;

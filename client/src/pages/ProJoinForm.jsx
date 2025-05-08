@@ -1,31 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { useEffect } from 'react';
+import img1 from "../assets/images/form1.png"
+import img2 from "../assets/images/form2.png"
+import img3 from "../assets/images/form3.png"
 
 const ProJoinForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const user= useSelector((state) => state.auth.user);
-  const loggedInUserId= user._id;
+  const user = useSelector((state) => state.auth.user);
+  const loggedInUserId = user._id;
+  const [isorg, setIsorg] = useState("");
 
-  console.log(loggedInUserId)
+  // Initialize form data with proper structure
   const [formData, setFormData] = useState({
-    profession: 'Interior Designer',
-    experience: 5,
-    location: 'Amman, Jordan',
-    pricePerHour: 20,
-    isOrganization: false,
-    bio: '',
+    userId: loggedInUserId, // Set userId on initial load
+    professionalType: "individual",
+    profession: "",
+    experience: 0,
+    location: "",
+    pricePerHour: 0,
+    bio: "",
+    companyServices: "",
+    packageType: "",
+    packagePriceEstimate: "",
+    packageServices: "",
+    paymentInfo: {
+      method: "",
+      payoutEmail: "",
+      stripeAccountId: "",
+      country: ""
+    },
+    // Initialize as empty arrays to avoid undefined errors
     portfolio: [],
     certifications: [],
-    backgroundImage: '',
-    linkedShops: [],
-    paymentInfo: {
-      method: 'stripe',
-      payoutEmail: '',
-      stripeAccountId: '',
-      country: ''
-    }
+    backgroundImage: null,
+    companyRegistration: null
   });
 
   useEffect(() => {
@@ -37,17 +46,65 @@ const ProJoinForm = () => {
   const handleSubmit = async () => {
     try {
       const form = new FormData();
+      
+      // Add all text fields
       form.append("userId", loggedInUserId);
-      form.append("profession", formData.profession);
+      form.append("professionalType", formData.professionalType);
       form.append("experience", formData.experience);
       form.append("location", formData.location);
-      form.append("pricePerHour", formData.pricePerHour);
-      form.append("isOrganization", formData.isOrganization ? "organization" : "individual");
       form.append("bio", formData.bio);
-      form.append("portfolio", JSON.stringify(formData.portfolio));
-      form.append("certifications", JSON.stringify(formData.certifications));
-      form.append("paymentInfo", JSON.stringify(formData.paymentInfo));
-      form.append("backgroundImage", formData.backgroundImage); // Must be a File object
+      
+      // Only add profession and pricePerHour for individual type
+      if (formData.professionalType === "individual") {
+        form.append("profession", formData.profession);
+        form.append("pricePerHour", formData.pricePerHour);
+      }
+  
+      // Organization-specific fields
+      if (formData.professionalType === "organization") {
+        form.append("companyServices", formData.companyServices);
+      }
+  
+      // All-in-one specific fields
+      if (formData.professionalType === "all_in_one") {
+        form.append("packageType", formData.packageType);
+        form.append("packagePriceEstimate", formData.packagePriceEstimate);
+        form.append("packageServices", formData.packageServices);
+      }
+  
+      // Payment Info (separated)
+      form.append("paymentInfo[method]", formData.paymentInfo.method);
+      form.append("paymentInfo[payoutEmail]", formData.paymentInfo.payoutEmail);
+      form.append("paymentInfo[stripeAccountId]", formData.paymentInfo.stripeAccountId);
+      form.append("paymentInfo[country]", formData.paymentInfo.country);
+  
+      // Background Image
+      if (formData.backgroundImage instanceof File) {
+        form.append("backgroundImage", formData.backgroundImage);
+      }
+  
+      // Company Registration
+      if (formData.companyRegistration instanceof File) {
+        form.append("companyRegistration", formData.companyRegistration);
+      }
+  
+      // Portfolio Files (Multiple)
+      if (formData.portfolio.length > 0) {
+        formData.portfolio.forEach((file) => {
+          if (file instanceof File) {
+            form.append("portfolio", file);
+          }
+        });
+      }
+  
+      // Certifications Files (Multiple)
+      if (formData.certifications.length > 0) {
+        formData.certifications.forEach((file) => {
+          if (file instanceof File) {
+            form.append("certifications", file);
+          }
+        });
+      }
   
       const res = await axios.post("http://localhost:5000/api/professionals/create", form, {
         headers: {
@@ -60,7 +117,7 @@ const ProJoinForm = () => {
       console.log(res.data.professional);
     } catch (err) {
       console.error("Submission error:", err.response?.data || err.message);
-      alert("Failed to create profile");
+      alert("Failed to create profile: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -73,50 +130,49 @@ const ProJoinForm = () => {
   };
 
   // Handler for changing payment method
-const handlePaymentMethodChange = (method) => {
-  setFormData({
-    ...formData,
-    paymentInfo: {
-      ...formData.paymentInfo,
-      method: method
-    }
-  });
-};
+  const handlePaymentMethodChange = (method) => {
+    setFormData({
+      ...formData,
+      paymentInfo: {
+        ...formData.paymentInfo,
+        method: method
+      }
+    });
+  };
 
-// Handler for changing payment info fields
-const handlePaymentInfoChange = (field, value) => {
-  setFormData({
-    ...formData,
-    paymentInfo: {
-      ...formData.paymentInfo,
-      [field]: value
-    }
-  });
-};
- console.log(formData)
+  // Handler for changing payment info fields
+  const handlePaymentInfoChange = (field, value) => {
+    setFormData({
+      ...formData,
+      paymentInfo: {
+        ...formData.paymentInfo,
+        [field]: value
+      }
+    });
+  };
+
   const handleToggle = (field, value) => {
+    setIsorg(value);
     setFormData({
       ...formData,
       [field]: value
     });
   };
 
-
-
+  // Fixed file upload handler to work with multer
   const handleFileUpload = (field, files) => {
-    // For demonstration purposes only, in a real app you'd handle file uploads differently
     if (field === 'portfolio' || field === 'certifications') {
       // For multiple files
-      const fileArray = Array.from(files).map(file => URL.createObjectURL(file));
+      const fileArray = Array.from(files);
       setFormData({
         ...formData,
         [field]: [...formData[field], ...fileArray]
       });
-    } else {
-      // For single file (background image)
+    } else if (field === 'backgroundImage' || field === 'companyRegistration') {
+      // For single file uploads
       setFormData({
         ...formData,
-        [field]: URL.createObjectURL(files[0])
+        [field]: files[0]
       });
     }
   };
@@ -126,8 +182,8 @@ const handlePaymentInfoChange = (field, value) => {
     if (currentStep === 3) {
       handleSubmit(); // Call submit when user clicks next on step 3
     } else {
-    console.log('Form data for step', currentStep, ':', formData);
-    setCurrentStep(currentStep + 1);
+      console.log('Form data for step', currentStep, ':', formData);
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -149,41 +205,11 @@ const handlePaymentInfoChange = (field, value) => {
         return renderProfessionalInfo();
     }
   };
-
   
   const renderProfessionalInfo = () => {
     return (
       <div className="bg-white p-8 rounded-lg shadow-sm flex-1 mb-6 md:mb-0">
         <h2 className="font-medium text-lg mb-6">Professional Information</h2>
-
-        <div className="mb-6">
-          <label className="block text-gray-600 mb-2 text-sm">Profession</label>
-          <div className="relative">
-            <select 
-              className="appearance-none border rounded-md px-4 py-2 w-full bg-white"
-              name="profession"
-              value={formData.profession}
-              onChange={handleInputChange}
-            >
-              <option>Interior Designer</option>
-              <option>General Contractor</option>
-              {/* <option >Plumbing Service</option>
-              <option>Electrician</option> */}
-              <option>Architects & Building</option>
-              {/* <option>Home Builder</option>
-              <option>Pool Builder</option>
-              <option>Painters</option>
-              <option>Landscape Contractor</option>
-              <option>Architect</option>
-              <option>Door Dealer</option> */}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
 
         <div className="mb-6">
           <label className="block text-gray-600 mb-2 text-sm">Experience</label>
@@ -194,12 +220,12 @@ const handlePaymentInfoChange = (field, value) => {
               value={formData.experience}
               onChange={handleInputChange}
             >
-              <option>Less than 1 year</option>
-              <option>1-3 years</option>
-              <option>3-5 years</option>
-              <option>5 years</option>
-              <option>5-10 years</option>
-              <option>10+ years</option>
+              <option value={1}>Less than 1 year</option>
+              <option value={3}>1-3 years</option>
+              <option value={4}>3-5 years</option>
+              <option value={5}>5 years</option>
+              <option value={10}>5-10 years</option>
+              <option value={20}>10+ years</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +256,6 @@ const handlePaymentInfoChange = (field, value) => {
               <option>Mafraq, Jordan</option>
               <option>Tafilah, Jordan</option>
               <option>Karak, Jordan</option>
-              
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,38 +266,121 @@ const handlePaymentInfoChange = (field, value) => {
         </div>
 
         <div className="mb-6">
-          <label className="block text-gray-600 mb-2 text-sm">Price Per Hour JD</label>
-          <input 
-            type="number" 
-            required
-            name="pricePerHour"
-            value={formData.pricePerHour}
-            onChange={handleInputChange}
-            className="border rounded-md px-4 py-2 w-full"
-            min="0"
-            step="5"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-600 mb-2 text-sm">Are You</label>
-          <div className="flex gap-4">
-            <button 
-              type="button"
-              onClick={() => handleToggle('isorganization', "organization")}
-              className={`px-4 py-2 cursor-pointer rounded-md border ${formData.isorganization ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'border-gray-200'}`}
-            >
-              Organization
-            </button>
-            <button 
-              type="button"
-              onClick={() => handleToggle('isorganization', "individual")}
-              className={`px-4 py-2 cursor-pointer rounded-md border ${!formData.isorganization ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'border-gray-200'}`}
-            >
-              Individual
-            </button>
+          <label className="block text-gray-600 mb-2 text-sm">I am a:</label>
+          <div className="flex flex-col md:flex-row gap-3">
+            {[
+              { label: "Individual Professional", value: "individual" },
+              { label: "Company / Firm", value: "organization" },
+              { label: "Full-Service Company", value: "all_in_one" }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleToggle('professionalType', option.value)}
+                className={`px-4 py-2 rounded-md border ${
+                  formData.professionalType === option.value
+                    ? 'bg-yellow-50 border-yellow-300 text-yellow-700'
+                    : 'border-gray-200'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
+        
+        {formData.professionalType === "all_in_one" ? (
+          // Organization-Specific Fields
+          <>
+            <div className="mb-6">
+              <label className="block text-gray-600 mb-2 text-sm">Package Types Offered</label>
+              <select
+                name="packageType"
+                value={formData.packageType}
+                onChange={handleInputChange}
+                className="border rounded-md px-4 py-2 w-full"
+              >
+                <option value="">Select package type</option>
+                <option value="Full Construction Package">Full Construction Package (A–Z)</option>
+                <option value="Pre-fabricated Home">Pre-fabricated Homes</option>
+                <option value="Full Construction & Pre-fabricated Home">Both</option>
+              </select>
+            </div>
+
+            {/* Estimated price or custom note */}
+            <div className="mb-6">
+              <label className="block text-gray-600 mb-2 text-sm">Estimated Price or Starting Budget (JD)</label>
+              <input 
+                type="number" 
+                name="packagePriceEstimate"
+                value={formData.packagePriceEstimate || ''}
+                onChange={handleInputChange}
+                className="border rounded-md px-4 py-2 w-full"
+                min="0"
+                step="1000"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-600 mb-2 text-sm">Services Included in Package</label>
+              <textarea 
+                name="packageServices"
+                value={formData.packageServices || ''}
+                onChange={handleInputChange}
+                className="border rounded-md px-4 py-2 w-full"
+                rows={4}
+                placeholder="E.g. architecture, excavation, construction, finishing, etc."
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-600 mb-2 text-sm">Company Registration Document</label>
+              <input 
+                type="file"
+                onChange={(e) => handleFileUpload("companyRegistration", e.target.files)}
+                className="border rounded-md px-4 py-2 w-full"
+              />
+            </div>
+          </>
+        ) : (
+          // Individual Professional Fields
+          <>
+            <div className="mb-6">
+              <label className="block text-gray-600 mb-2 text-sm">Profession</label>
+              <div className="relative">
+                <select 
+                  className="appearance-none border rounded-md px-4 py-2 w-full bg-white"
+                  name="profession"
+                  value={formData.profession}
+                  onChange={handleInputChange}
+                >
+                  <option>Interior Designer</option>
+                  <option>General Contractor</option>
+                  <option>Architects & Building</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-600 mb-2 text-sm">Price Per Hour (JD)</label>
+              <input 
+                type="number" 
+                required
+                name="pricePerHour"
+                value={formData.pricePerHour}
+                onChange={handleInputChange}
+                className="border rounded-md px-4 py-2 w-full"
+                min="0"
+                step="5"
+              />
+            </div>
+          </>
+        )}
       </div>
     );
   };
@@ -317,7 +425,7 @@ const handlePaymentInfoChange = (field, value) => {
                 <div className="flex flex-wrap gap-2">
                   {formData.portfolio.map((item, index) => (
                     <div key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
-                      File {index + 1}
+                      {item instanceof File ? item.name : `File ${index + 1}`}
                     </div>
                   ))}
                 </div>
@@ -365,7 +473,7 @@ const handlePaymentInfoChange = (field, value) => {
               <div className="flex flex-wrap gap-2">
                 {formData.certifications.map((cert, index) => (
                   <div key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
-                    Certificate {index + 1}
+                    {cert instanceof File ? cert.name : `Certificate ${index + 1}`}
                   </div>
                 ))}
               </div>
@@ -376,12 +484,12 @@ const handlePaymentInfoChange = (field, value) => {
         <div className="mb-6">
           <label className="block text-gray-600 mb-2 text-sm">Background Image</label>
           <div className="border-dashed border-2 border-gray-300 rounded-md p-6 text-center">
-                      <input
+            <input
               type="file"
+              id="backgroundImage"
+              className="hidden"
               accept="image/*"
-              onChange={(e) =>
-                setFormData({ ...formData, backgroundImage: e.target.files[0] })
-              }
+              onChange={(e) => handleFileUpload("backgroundImage", e.target.files)}
             />
             <label htmlFor="backgroundImage" className="cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -393,7 +501,19 @@ const handlePaymentInfoChange = (field, value) => {
           {formData.backgroundImage && (
             <div className="mt-4">
               <p className="font-medium text-sm mb-2">Preview:</p>
-              <div className="h-32 bg-cover bg-center rounded-md" style={{ backgroundImage: `url(${formData.backgroundImage})` }}></div>
+              <div className="h-32 bg-cover bg-center rounded-md">
+                {formData.backgroundImage instanceof File ? (
+                  <img 
+                    src={URL.createObjectURL(formData.backgroundImage)} 
+                    alt="Background Preview" 
+                    className="h-full w-full object-cover rounded-md"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-gray-200 rounded-md flex items-center justify-center">
+                    <span className="text-gray-500">No preview available</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -476,8 +596,6 @@ const handlePaymentInfoChange = (field, value) => {
           <p className="text-xs text-gray-500 mt-1">Country where your payment account is registered</p>
         </div>
         
-        
-        
         {/* PayPal-specific information */}
         {formData.paymentInfo.method === 'paypal' && (
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
@@ -489,8 +607,8 @@ const handlePaymentInfoChange = (field, value) => {
       </div>
     );
   };
+  
   const renderCompleted = () => {
-    console.log(formData);
     return (
       <div className="bg-white p-8 rounded-lg shadow-sm flex-1 mb-6 md:mb-0 text-center">
         <div className="mb-6">
@@ -521,7 +639,7 @@ const handlePaymentInfoChange = (field, value) => {
     <div className="bg-gray-100 min-h-screen p-4">
       {/* Progress Steps */}
       <div className="max-w-6xl mx-auto mb-8 px-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div className="flex items-center">
             <div className={`${currentStep >= 1 ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-500'} rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold`}>
               1
@@ -544,7 +662,7 @@ const handlePaymentInfoChange = (field, value) => {
             <div className={`${currentStep >= 3 ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-500'} rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold`}>
               3
             </div>
-            <span className={`ml-2 text-sm ${currentStep >= 3 ? 'font-bold' : 'text-gray-500'}`}>Services & Preferences</span>
+            <span className={`ml-2 text-sm ${currentStep >= 3 ? 'font-bold' : 'text-gray-500'}`}>Payment Information</span>
           </div>
           
           <div className="border-t border-gray-300 flex-grow mx-2"></div>
@@ -570,26 +688,33 @@ const handlePaymentInfoChange = (field, value) => {
                 <>
                   <h2 className="text-2xl font-medium mb-4">Professional Info</h2>
                   <p className="text-gray-600 mb-8">Tell us about your professional background.</p>
+                  <div className="flex justify-center">
+                <img src={img1} alt="Pro registration illustration" className="w-full max-w-xs" />
+              </div>
                 </>
+                
               )}
               
               {currentStep === 2 && (
                 <>
                   <h2 className="text-2xl font-medium mb-4">Profile Details</h2>
                   <p className="text-gray-600 mb-8">Share more about yourself and your past work to attract potential clients.</p>
+                  <div className="flex justify-center">
+                <img src={img2} alt="Pro registration illustration" className="w-full max-w-xs" />
+              </div>
                 </>
               )}
               
               {currentStep === 3 && (
                 <>
-                  <h2 className="text-2xl font-medium mb-4">Services & Preferences</h2>
+                  <h2 className="text-2xl font-medium mb-4">Payment Information</h2>
                   <p className="text-gray-600 mb-8">Let us know what services you provide and your preferences for bookings.</p>
+                  <div className="flex justify-center">
+                <img src={img3} alt="Pro registration illustration" className="w-full max-w-xs" />
+              </div>
                 </>
               )}
               
-              <div className="flex justify-center">
-                <img src="/api/placeholder/320/240" alt="Pro registration illustration" className="w-full max-w-xs" />
-              </div>
             </div>
           </div>
         )}

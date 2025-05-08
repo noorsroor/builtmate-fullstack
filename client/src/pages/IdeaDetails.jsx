@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import IdeasList from '../components/IdeasList';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 export default function IdeaDetails() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function IdeaDetails() {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [pro, setPro]= useState({});
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user); // Get current user from Redux
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -197,6 +199,7 @@ export default function IdeaDetails() {
               </button>
               
               {/* Save button */}
+              {user && (
               <button 
                 onClick={toggleSaved}
                 className=" cursor-pointer w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-gray-50 transition-colors"
@@ -216,6 +219,7 @@ export default function IdeaDetails() {
                 </svg>
                 {saved ? "Saved" : "Save"}
               </button>
+              ) }
             </div>
           </div>
         </div>

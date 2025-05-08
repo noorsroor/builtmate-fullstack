@@ -18,6 +18,8 @@ function FindProPage() {
   const handleCategoryChange = (newCategory) => {
     dispatch(setCategory(newCategory))
   }
+
+  console.log(category)
   return (
     <>
     <ProHeroSection/>

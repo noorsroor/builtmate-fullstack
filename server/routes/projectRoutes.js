@@ -4,7 +4,7 @@ const parser = require('../middleware/upload'); // Multer + Cloudinary config
 const { createProject, getAllProjects, getProjectById } = require('../controllers/projectController');
 
 // POST a new project
-router.post('/projects', parser.array('images', 5), createProject); // Max 5 images
+router.post('/projects', parser.array('images', 12), createProject); // Max 5 images
 
 //get all projects 
 router.get("/projects", getAllProjects); // GET /api/projects

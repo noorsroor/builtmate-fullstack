@@ -16,8 +16,12 @@ const getProfessionals = async (req, res) => {
         let filter = {};
 
         // Filter by category (profession) if provided
-        if (category && category !== 'Select All') {
+        if (category) {
+          if (category === 'Full Construction Package' || category === 'Pre-fabricated Home') {
+            filter.packageType = category;
+          } else if (category !== 'Select All') {
             filter.profession = category;
+          }
         }
         
         filter.status="approved";
@@ -105,9 +109,9 @@ const getProfessionalDetails = async (req, res) => {
         profileImage: professional.userId.profilePicture || 'https://via.placeholder.com/150'
       },
       backgroundImage: professional.backgroundImage || 'https://via.placeholder.com/1200x400',
-      profession: professional.profession || 'Professional',
+      profession: professional.profession || professional.packageType,
       rate: professional.rating,
-      bio: professional.bio || 'No bio available',
+      bio: professional.bio +" .Our Services Include: "+ professional.packageServices || 'No bio available',
       shortBio: professional.bio?.substring(0, 150) + (professional.bio?.length > 150 ? '...' : '') || 'No bio available',
       location: professional.location || 'Location not specified',
       pricePerHour: professional.pricePerHour || 0,
@@ -159,38 +163,82 @@ const createProfessional = async (req, res) => {
   try {
     const {
       userId,
+      professionalType,
       profession,
       experience,
       location,
       pricePerHour,
-      isOrganization,
       bio,
-      portfolio,
-      certifications,
-      paymentInfo // 🆕 from frontend (optional)
+      // These now come as uploaded files
+      companyServices,
+      packageType,
+      packagePriceEstimate,
+      packageServices,
+      paymentInfo
     } = req.body;
 
-    // Upload background image to Cloudinary
-    const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'professionals/backgrounds',
-    });
+    const files = req.files || {};
 
-    // Create new professional profile
+    // Upload background image
+    let backgroundImageUrl = "";
+    if (files.backgroundImage?.[0]) {
+      const result = await cloudinary.uploader.upload(files.backgroundImage[0].path, {
+        folder: 'professionals/backgrounds',
+      });
+      backgroundImageUrl = result.secure_url;
+    }
+
+    // Upload company registration doc
+    let companyRegistrationUrl = "";
+    if (files.companyRegistration?.[0]) {
+      const regUpload = await cloudinary.uploader.upload(files.companyRegistration[0].path, {
+        folder: 'professionals/documents',
+      });
+      companyRegistrationUrl = regUpload.secure_url;
+    }
+
+    // Upload portfolio images
+    const portfolioUrls = [];
+    if (files.portfolio?.length) {
+      for (const file of files.portfolio) {
+        const uploaded = await cloudinary.uploader.upload(file.path, {
+          folder: 'professionals/portfolio',
+        });
+        portfolioUrls.push(uploaded.secure_url);
+      }
+    }
+
+    // Upload certification files
+    const certificationUrls = [];
+    if (files.certifications?.length) {
+      for (const file of files.certifications) {
+        const uploaded = await cloudinary.uploader.upload(file.path, {
+          folder: 'professionals/certifications',
+        });
+        certificationUrls.push(uploaded.secure_url);
+      }
+    }
+
+    // Create Professional
     const newPro = await Professional.create({
       userId,
-      profession,
+      professionalType,
+      profession: professionalType === "individual" ? profession : undefined,
       experience,
       location,
-      pricePerHour,
-      isOrganization,
+      pricePerHour: professionalType === "individual" ? pricePerHour : undefined,
       bio,
-      portfolio,
-      certifications,
-      backgroundImage: uploadedImage.secure_url,
-      paymentInfo// 🆕 Store payment info if available
+      portfolio: portfolioUrls,
+      certifications: certificationUrls,
+      backgroundImage: backgroundImageUrl,
+      companyServices: professionalType === "organization" ? companyServices : undefined,
+      companyRegistration: professionalType !== "individual" ? companyRegistrationUrl : undefined,
+      packageType: professionalType === "all_in_one" ? packageType : undefined,
+      packagePriceEstimate: professionalType === "all_in_one" ? packagePriceEstimate : undefined,
+      packageServices: professionalType === "all_in_one" ? packageServices : undefined,
+      paymentInfo
     });
 
-    // Update User model to reference the created Professional
     await User.findByIdAndUpdate(userId, { professionalId: newPro._id });
 
     res.status(201).json({ message: "Professional profile created", professional: newPro });
@@ -199,6 +247,52 @@ const createProfessional = async (req, res) => {
     res.status(500).json({ error: "Failed to create professional profile" });
   }
 };
+
+
+// // const createProfessional = async (req, res) => {
+//   try {
+//     const {
+//       userId,
+//       profession,
+//       experience,
+//       location,
+//       pricePerHour,
+//       isOrganization,
+//       bio,
+//       portfolio,
+//       certifications,
+//       paymentInfo // 🆕 from frontend (optional)
+//     } = req.body;
+
+//     // Upload background image to Cloudinary
+//     const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
+//       folder: 'professionals/backgrounds',
+//     });
+
+//     // Create new professional profile
+//     const newPro = await Professional.create({
+//       userId,
+//       profession,
+//       experience,
+//       location,
+//       pricePerHour,
+//       isOrganization,
+//       bio,
+//       portfolio,
+//       certifications,
+//       backgroundImage: uploadedImage.secure_url,
+//       paymentInfo// 🆕 Store payment info if available
+//     });
+
+//     // Update User model to reference the created Professional
+//     await User.findByIdAndUpdate(userId, { professionalId: newPro._id });
+
+//     res.status(201).json({ message: "Professional profile created", professional: newPro });
+//   } catch (error) {
+//     console.error("Create Pro Error:", error);
+//     res.status(500).json({ error: "Failed to create professional profile" });
+//   }
+// };
 
 
 module.exports = { addProfessional, getProfessionals, getProfessionalDetails, createProfessional };

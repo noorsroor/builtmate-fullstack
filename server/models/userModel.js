@@ -7,17 +7,18 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
-    address: { type: String, required: true},
-    role: { type: String, enum: ["user", "admin","pro"],default: "user"},
+    address: { type: String, required: true },
+    role: { type: String, enum: ["user", "admin", "pro"], default: "user" },
     profilePicture: { type: String, default: "" },
     professionalId: { type: mongoose.Schema.Types.ObjectId, ref: "Professional" },
     messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
     appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }],
     subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
     isVerified: { type: Boolean, default: false },
-    resetCode: { type: String }, // Stores password reset token
+    resetCode: { type: String },
+    isDeleted: { type: Boolean, default: false }, // <-- added here
   },
   { timestamps: true }
 );
 
-module.exports= mongoose.model("User", UserSchema);
+module.exports = mongoose.model("User", UserSchema);

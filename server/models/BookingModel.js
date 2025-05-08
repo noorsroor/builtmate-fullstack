@@ -6,7 +6,7 @@ const BookingSchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ['architects & building', 'general contractor', 'interior designer'],
+    enum: ['architects & building', 'general contractor', 'interior designer', 'pre-fabricated home', 'full construction package'],
     required: true
   },
 

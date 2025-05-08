@@ -91,8 +91,8 @@ console.log(user)
               </h1>
             </div>
 
-            {/* Toggle Button for Mobile */}
-            <div className="flex md:hidden">
+            {/* Toggle Button for Mobile and Tablet */}
+            <div className="flex lg:hidden">
               <button
                 onClick={toggleMenu}
                 className="text-gray-500 hover:text-yellow-600 focus:outline-none"
@@ -102,8 +102,8 @@ console.log(user)
             </div>
 
             {/* Links for Desktop */}
-            <div className="hidden md:flex items-center space-x-8 ">
-      {["/", "/ideas", "/findPro", "/shops"].map((path, index) => (
+            <div className="hidden lg:flex items-center space-x-8 ">
+      {["/", "/ideas", "/findPro"].map((path, index) => (
         <NavLink
           key={path}
           to={path}
@@ -115,7 +115,7 @@ console.log(user)
             }`
           }
         >
-          {t(["nav.home", "nav.ideas", "nav.findPro", "nav.shops"][index])}
+          {t(["nav.home", "nav.ideas", "nav.findPro"][index])}
         </NavLink>
       ))}
 
@@ -137,7 +137,7 @@ console.log(user)
       )}
     </div>
 
-            <div className='hidden md:flex items-center space-x-4'>
+            <div className='hidden lg:flex items-center space-x-4'>
               <div className="relative">
                 <button
                   className="py-2 px-5 rounded-full"
@@ -211,13 +211,15 @@ console.log(user)
                         >
                           {t('user.profile') || 'Profile'}
                         </Link>
-                        {/* <Link 
-                          to="/settings" 
+                        {user.role === "admin" && (
+                        <Link 
+                          to="/admin" 
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setUserMenuOpen(false)}
                         >
-                          {t('user.settings') || 'Settings'}
-                        </Link> */}
+                          Admin Dashbourd
+                        </Link>
+                        )}
                         <div className="border-t border-gray-200 my-1"></div>
                         <button
                           onClick={handleLogout}
@@ -242,11 +244,11 @@ console.log(user)
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile and Tablet Menu */}
         {menuOpen && (
-          <div className="md:hidden bg-white shadow-lg">
+          <div className="lg:hidden bg-white shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {['/', '/ideas', '/findPro', '/shops'].map((path, index) => (
+              {['/', '/ideas', '/findPro'].map((path, index) => (
                 <NavLink
                   key={path}
                   to={path}
@@ -257,11 +259,34 @@ console.log(user)
                   }
                   onClick={closeMenu}
                 >
-                  {t(['nav.home', 'nav.ideas', 'nav.findPro', 'nav.shops'][index])}
+                  {t(['nav.home', 'nav.ideas', 'nav.findPro'][index])}
                 </NavLink>
               ))}
+              
+              {/* Add Join as Pro or Add Project button in mobile/tablet menu */}
+              {user?.role === "pro" ? (
+                <NavLink
+                  to="/add-project"
+                  className="block w-full text-center bg-gray-900 text-white font-semibold text-[14px] px-4 py-2 rounded-md hover:bg-gray-300 hover:text-black transition duration-300 mt-2"
+                  onClick={closeMenu}
+                >
+                  Add Project
+                </NavLink>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleJoinClick();
+                    closeMenu();
+                  }}
+                  className="block w-full text-center bg-gray-900 text-white cursor-pointer text-[14px] font-semibold px-4 py-2 rounded-md hover:bg-gray-300 hover:text-black transition duration-300 mt-2"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <PiToolboxFill className='text-[20px]'/> Join as Pro
+                  </div>
+                </button>
+              )}
             </div>
-            <div className='md:hidden px-3 py-2'>
+            <div className='lg:hidden px-3 py-2'>
               <div className="flex justify-center mt-2">
                 <button
                   onClick={() => handleLanguageChange('en')}
@@ -277,24 +302,27 @@ console.log(user)
                 </button>
               </div>
 
-              {/* Conditional rendering for mobile */}
+              {/* Conditional rendering for mobile and tablet */}
               {user ? (
                 <div className="mt-3 border-t border-gray-200 pt-3">
                   <div className="flex justify-between items-center px-3 mb-3">
                     <div className="flex items-center">
-                      <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white mr-2"></div>
-                      <span className="font-medium">{user.username || 'username'}</span>
+                      {user?.profilePicture ? (
+                        <img 
+                          className="h-8 w-8 rounded-full bg-gray-300 filter grayscale mr-2" 
+                          src={user?.profilePicture || './assets/images/user.png'} 
+                          alt="profile image"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-white mr-2">
+                          <span>{getInitial()}</span>
+                        </div>
+                      )}
+                      <span className="font-medium">{user.firstname + " " + user.lastname || 'username'}</span>
                     </div>
                     <div className="flex space-x-4">
-                      <button className="text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                        </svg>
-                      </button>
-                      <button className="text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
+                      <button onClick={() => handleGoBookmark()} className="text-gray-600">
+                        <FaBookmark className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -306,13 +334,15 @@ console.log(user)
                   >
                     {t('user.profile') || 'Profile'}
                   </Link>
-                  <Link
-                    to="/settings"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-                    onClick={closeMenu}
-                  >
-                    {t('user.settings') || 'Settings'}
-                  </Link>
+                  {user.role === "admin" && (
+                    <Link
+                      to="/admin"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
+                      onClick={closeMenu}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-100"
@@ -322,12 +352,12 @@ console.log(user)
                 </div>
               ) : (
                 <Link
-                  to="/signup"
-                  className="block text-center bg-[#E7A624] text-white py-2 mt-2 text-[12px] rounded-full shadow-md transition duration-300 hover:bg-yellow-700 hover:shadow-lg"
+                  to="/login"
+                  className="block text-center bg-[#E7A624] text-black font-bold py-2 mt-2 text-[12px] rounded-full shadow-md transition duration-300 hover:bg-yellow-600 hover:shadow-lg"
                   style={{ boxShadow: '0 0 10px rgba(234, 179, 8, 0.5)' }}
                   onClick={closeMenu}
                 >
-                  {t('nav.signUp')}
+                  {t('nav.login')}
                 </Link>
               )}
             </div>

@@ -12,7 +12,7 @@ export default function IdeasList({category}) {
   const [itemId, setItemId] = useState(null);
   const [bookmarked, setBookmarked] = useState(false);
   const user = useSelector((state) => state.auth.user); // Get current user from Redux
-  const userId = user._id;
+  const userId = user?._id;
   const type = "project"
   const navigate = useNavigate();
 
@@ -109,6 +109,7 @@ const fetchProjects = async () => {
                   className="bg-white text-yellow-500 font-bold rounded-full px-3 py-1 text-sm mr-2 mb-2 flex items-center"
                 >{idea.category}</p>
                 </div>
+                {user && (
                 <button 
                   onClick={() => toggleSave(idea._id)}
                   className="p-1 focus:outline-none"
@@ -131,6 +132,7 @@ const fetchProjects = async () => {
                     />
                   </svg>
                 </button>
+                )}
               </div>
             </div>
           </div>

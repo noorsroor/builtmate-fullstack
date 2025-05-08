@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { BsEnvelopeFill } from 'react-icons/bs';
 import { PiSealCheckFill } from "react-icons/pi";
+import { useSelector } from 'react-redux';
+import QuoteModal from "./QuoteModal";
 
 const ProList = ({ location, category, searchQuery }) => {
   const [professionals, setProfessionals] = useState([]);
@@ -13,6 +15,10 @@ const ProList = ({ location, category, searchQuery }) => {
   const [totalPages, setTotalPages] = useState(1); // Track total pages
   const navigate = useNavigate();
   const [premiumPros, setPremiumPros] = useState();
+  const user = useSelector((state) => state.auth.user);
+  const userId = user?._id;
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [pro, setPro] = useState("");
 
 
   const checkIsPremium = async (proId) => {
@@ -24,7 +30,6 @@ const ProList = ({ location, category, searchQuery }) => {
       return false;
     }
   };
-
   // Fetch professionals with filters and pagination
   const fetchProfessionals = async () => {
     try {
@@ -101,17 +106,17 @@ const ProList = ({ location, category, searchQuery }) => {
     <div className="mx-4 lg:mx-32 md:mx-16 my-12">
       {professionals.map((pro) => (
         <React.Fragment key={pro._id}>
-          <div className="flex flex-col md:flex-row bg-[#F3F3F3] rounded-2xl shadow-sm p-5 md:p-5 md:pr-10">
+          <div className="flex flex-col lg:flex-row bg-[#F3F3F3] rounded-2xl shadow-sm p-5 md:p-5 md:pr-10">
             {/* Card Image */}
             <img 
               src={pro.backgroundImage || 'https://i.pinimg.com/736x/cf/6d/0d/cf6d0d9ccc92297739236f35ec3c7a5e.jpg'} 
               alt="Interior Design" 
-              className="w-full md:w-80 h-64 object-cover rounded-lg"
+              className="w-full lg:w-80 h-64 object-cover rounded-lg"
             />
             
             {/* Card Content */}
             <div className="flex-1 flex flex-col ml-0 md:ml-8 mt-4 md:mt-0 relative">
-              <div className="flex flex-col md:flex-row">
+              <div className="flex flex-col lg:flex-row">
                 {/* Profile info */}
                 <div className="flex items-start gap-3">
                   {pro.userId?.profilePicture? (
@@ -137,13 +142,13 @@ const ProList = ({ location, category, searchQuery }) => {
               {/* Card Actions */}
               <div className="md:absolute md:right-0 md:top-8 flex flex-col items-center gap-5 mt-5 md:mt-0">
                 {/* Send Message Button */}
-                <button 
+                <button  onClick={() =>{user? setShowQuoteModal(true):  navigate("/login") ; setPro(pro)}}
                   className="group cursor-pointer flex items-center justify-center gap-2 bg-white border border-gray-300 py-2 px-4 rounded-lg transition-all duration-300 w-full md:w-60 overflow-hidden hover:shadow-sm"
                 >
                   <div className="transition-transform duration-300 group-hover:translate-x-16 group-hover:scale-150">
                     <BsEnvelopeFill className="text-lg" />
                   </div>
-                  <span className="font-semibold text-sm transition-transform duration-300 group-hover:translate-x-52">Send Message</span>
+                  <span className="font-semibold text-sm transition-transform duration-300 group-hover:translate-x-52">Request a Quote</span>
                 </button>
                 
                 {/* Location */}
@@ -154,7 +159,7 @@ const ProList = ({ location, category, searchQuery }) => {
               </div>
               
               {/* Job Title */}
-              <p className="text-base font-bold lg:mt-20 md:mt-10 sm:mt-10">{pro.profession || 'Residential Interior Design'}</p>
+              <p className="text-base font-bold lg:mt-20 md:mt-10 sm:mt-10">{pro.profession || pro.packageType}</p>
               
               {/* Job Description */}
               <p className="text-gray-600 text-base mt-2 md:mr-24 line-clamp-3">
@@ -200,6 +205,13 @@ const ProList = ({ location, category, searchQuery }) => {
           Next
         </button>
       </div>
+      {showQuoteModal && (
+  <QuoteModal
+    onClose={() => setShowQuoteModal(false)}
+    professional={pro} // the professional data
+    userId={userId}
+  />
+)}
     </div>
   );
 };

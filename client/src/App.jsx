@@ -1,6 +1,7 @@
 import {createBrowserRouter , RouterProvider} from "react-router-dom";
 import {Navbar} from './components/Navbar'
 import ScrollToTop from "./components/scrollToTop";
+import AdminUsers from './pages/admin/AdminUsers';
 import './index.css'
 import {
   AboutPage,
@@ -22,6 +23,12 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Footer from "./components/Footer";
 import SubscriptionPlans from "./pages/SubscriptionPlans";
+import AdminProfessionals from "./pages/admin/AdminProfessionals";
+import AdminLayout from "./components/AdminLayout";
+import AdminBookings from "./pages/admin/AdminBookings";
+import AdminProjects from "./pages/admin/AdminProjects";
+import ProtectedRoute from "./components/ProtectedRoute";
+import NotFound from "./components/NotFound";
 
 
 function App() {
@@ -80,7 +87,7 @@ function App() {
         },
         {
           path:'/profile',
-          element: <ProfilePage/>
+          element:<ProtectedRoute> <ProfilePage/> </ProtectedRoute>
         },
         {
           path:'/joinform',
@@ -101,6 +108,10 @@ function App() {
       ]
     },
     {
+      path:'*',
+      element: <NotFound/>
+    },
+    {
       path:'/login',
       element: <Login/>
     },
@@ -109,9 +120,17 @@ function App() {
       element: <Signup/>
     },
     {
-      path:'/admin',
-      element: <AdminDash/>
-    }
+      path: '/admin',
+      element:<ProtectedRoute> <AdminLayout /> </ProtectedRoute>, // shared sidebar + outlet here
+      children: [
+        { index: true, element: <AdminDash /> },
+        { path: 'users', element: <AdminUsers /> },
+        { path: 'professionals', element: <AdminProfessionals /> },
+        { path: 'bookings', element: <AdminBookings/> },
+        { path: 'ideas', element: <AdminProjects/> },
+        // (add more admin pages easily here)
+      ],
+    },
   ]);
 
 
