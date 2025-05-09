@@ -340,9 +340,9 @@ const [backgroundImagePreview, setBackgroundImagePreview] = useState(null);
       <div className="flex">
         {/* Left Sidebar */}
         <div className="w-1/5 bg-white p-6 border-r border-gray-300 hidden md:block">
-          <div className="mb-6">
+          <div className="mb-6 flex row">
             <div className="font-semibold text-gray-700 mb-2">Role:</div>
-            <div className="ml-6">{userData?.role || 'User'}</div>
+            <div className="ml-6 font-bold">{userData?.role || 'User'}</div>
           </div>
           {user?.role==="pro" &&(
           <div className="mb-6">
@@ -355,38 +355,10 @@ const [backgroundImagePreview, setBackgroundImagePreview] = useState(null);
                 </button>
           </div>
           )}
-          <div className="mb-6">
-            <div className="font-semibold text-gray-700 mb-2">Next rank:</div>
-            <div className="relative w-48 h-48 mx-auto">
-              {/* Circle progress bar */}
-              <div className="absolute inset-0 rounded-full border-8 border-gray-200"></div>
-              <div 
-                className="absolute inset-0 rounded-full border-8 border-yellow-600" 
-                style={{ 
-                  clipPath: 'polygon(0 0, 100% 0, 100% 10%, 0 10%)',
-                  transform: 'rotate(45deg)'
-                }}
-              ></div>
-              
-              {/* Center content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="bg-yellow-500 rounded-full w-16 h-16 flex items-center justify-center text-white text-2xl font-bold mb-2">
-                  1
-                </div>
-                <div className="text-gray-800 font-bold">Doctor</div>
-                <div className="text-xs text-gray-600">Get 7.5k xp to level up!</div>
-              </div>
-            </div>
-          </div>
           
           <div className="mb-2">
             <div className="font-semibold text-gray-700">Joined</div>
-            <div className="ml-6">{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : '16 Apr 2025'}</div>
-          </div>
-          
-          <div>
-            <div className="font-semibold text-gray-700">Badges</div>
-            <div className="ml-6">0</div>
+            <div className="ml-6 font-bold">{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : '16 Apr 2025'}</div>
           </div>
         </div>
         

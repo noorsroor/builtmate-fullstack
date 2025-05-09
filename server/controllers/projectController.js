@@ -96,3 +96,41 @@ exports.getProjectById = async (req, res) => {
     res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 };
+
+exports.getHomeProjects = async (req, res) => {
+  try {
+      const projects = await Project.find({ status: "approved" })
+          .select("title category images")
+          .limit(12)
+          .sort({ createdAt: -1 });
+
+      res.status(200).json(projects);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to fetch projects" });
+  }
+};
+
+exports.getSuccessProjects = async (req, res) => {
+  try {
+    // Fetch only "Full Constructed House" projects with status "approved"
+    const project = await Project.findById('681e1d1c0b838bd7dc7d0e64')
+    .populate({
+      path: 'professional',
+      populate: {
+        path: 'userId',
+        select: 'firstname lastname profilePicture'
+      },
+      select: 'rating userId'
+    });
+
+    if (!project) {
+      return res.status(404).json({ message: "No success projects found" });
+    }
+
+    res.status(200).json(project);
+  } catch (error) {
+    console.error("Error fetching success projects:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

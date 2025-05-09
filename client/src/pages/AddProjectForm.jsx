@@ -148,6 +148,7 @@ const AddProjectForm = () => {
         title: 'Submission Failed',
         text: error.response?.data?.message || 'Something went wrong',
       });
+      setSubmitted(true);
       console.error("Upload error:", error.response?.data || error.message);
     }
   };
@@ -189,7 +190,7 @@ const AddProjectForm = () => {
               name="description"
               value={dataForm.description}
               onChange={handleInputChange}
-              maxLength={250}
+              maxLength={500}
               rows="5"
               className="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-300"
               required
